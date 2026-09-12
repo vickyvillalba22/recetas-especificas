@@ -3,5 +3,20 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base { html { scroll-behavior: smooth; } body { margin: 0; min-width: 320px; overflow-x: hidden; font-family: 'DM Sans', sans-serif; } button, input, textarea, select { font: inherit; } button, label { -webkit-tap-highlight-color: transparent; } }
-@layer components { .meal-card { @apply min-h-[84px] rounded-2xl border border-ink/5 bg-cream p-3 transition hover:-translate-y-0.5 hover:border-coral/30 hover:bg-white; } .field { @apply w-full rounded-xl border border-ink/10 bg-white px-4 py-3 font-normal outline-none transition placeholder:text-ink/30 focus:border-moss focus:ring-2 focus:ring-moss/10; } }
+@layer base {
+  html { scroll-behavior: smooth; }
+  body { margin: 0; min-width: 320px; overflow-x: hidden; font-family: 'DM Sans', sans-serif; background-color: #f7f7f2; color: #17251f; }
+  html.dark body { background-color: #0d1614; color: #e4eee6; }
+  button, input, textarea, select { font: inherit; }
+  button, label { -webkit-tap-highlight-color: transparent; }
+}
+@layer components {
+  .meal-card { @apply min-h-[64px] rounded-xl border border-ink/10 bg-cream p-3 transition hover:-translate-y-0.5 hover:border-moss/40 hover:bg-white; }
+  .dark .meal-card { @apply border-cream/10 bg-ink-soft hover:border-moss/40 hover:bg-ink; }
+  .meal-card--filled { @apply border-moss/30 bg-sage hover:bg-sage; }
+  .dark .meal-card--filled { @apply border-moss/40 bg-moss/25 hover:bg-moss/30; }
+  .field { @apply w-full rounded-xl border border-ink/10 bg-white px-4 py-3 font-normal outline-none transition placeholder:text-ink/30 focus:border-moss focus:ring-2 focus:ring-moss/10; }
+  .dark .field { @apply border-cream/10 bg-ink-soft text-cream placeholder:text-cream/30; }
+}
+
+#menu:not(.weekly-calendar) { display: none; }

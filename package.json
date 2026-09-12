@@ -1,5 +1,5 @@
 {
-  "name": "sibo-semanal",
+  "name": "sibo-decis",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -11,10 +11,10 @@
   },
   "dependencies": {
     "@google/genai": "^1.14.0",
+    "@iconify/react": "^6.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^5.1.0",
-    "lucide-react": "^0.468.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },

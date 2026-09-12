@@ -1,4 +1,4 @@
-# sibo.semanal
+# sibo.decis
 
 Boilerplate de una aplicación web para planificar comidas y organizar una lista de compras siguiendo una alimentación baja en FODMAP. Incluye un asistente de recetas conectado a Gemini.
 
