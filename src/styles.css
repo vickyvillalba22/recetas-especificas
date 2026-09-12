@@ -1,0 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base { html { scroll-behavior: smooth; } body { margin: 0; min-width: 320px; overflow-x: hidden; font-family: 'DM Sans', sans-serif; } button, input, textarea, select { font: inherit; } button, label { -webkit-tap-highlight-color: transparent; } }
+@layer components { .meal-card { @apply min-h-[84px] rounded-2xl border border-ink/5 bg-cream p-3 transition hover:-translate-y-0.5 hover:border-coral/30 hover:bg-white; } .field { @apply w-full rounded-xl border border-ink/10 bg-white px-4 py-3 font-normal outline-none transition placeholder:text-ink/30 focus:border-moss focus:ring-2 focus:ring-moss/10; } }
