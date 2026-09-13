@@ -13,6 +13,7 @@ export const Leaf = (props) => <HugeIcon icon="organic-food" {...props} />
 export const ListChecks = (props) => <HugeIcon icon="list-checks" {...props} />
 export const Menu = (props) => <HugeIcon icon="menu-01" {...props} />
 export const Moon = (props) => <HugeIcon icon="moon-01" {...props} />
+export const Plus = (props) => <HugeIcon icon="add-01" {...props} />
 export const Sparkles = (props) => <HugeIcon icon="sparkles" {...props} />
 export const Sun = (props) => <HugeIcon icon="sun-01" {...props} />
 export const X = (props) => <HugeIcon icon="cancel-01" {...props} />
