@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Route, Routes, useNavigate } from 'react-router-dom'
+import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { Header } from './components/home/Header'
 import { HomePage } from './pages/HomePage'
 import { RecipesPage } from './pages/RecipesPage'
@@ -8,10 +8,11 @@ import { JournalPage } from './pages/JournalPage'
 import './styles.css'
 
 function AppLayout() {
-  const navigate = useNavigate(); const [theme, setTheme] = useState(() => { try { return localStorage.getItem('sibo-theme') || 'light' } catch { return 'light' } }); const [mobileNavOpen, setMobileNavOpen] = useState(false)
+  const navigate = useNavigate(); const location = useLocation(); const [theme, setTheme] = useState(() => { try { return localStorage.getItem('sibo-theme') || 'light' } catch { return 'light' } }); const [mobileNavOpen, setMobileNavOpen] = useState(false)
   useEffect(() => { document.documentElement.classList.toggle('dark', theme === 'dark'); try { localStorage.setItem('sibo-theme', theme) } catch {} }, [theme])
+  useEffect(() => { if (!location.hash) return; const frame = window.requestAnimationFrame(() => { const target = document.getElementById(location.hash.slice(1)); if (!target) return; const headerOffset = 96; const top = target.getBoundingClientRect().top + window.scrollY - headerOffset; window.scrollTo({ top, behavior: 'smooth' }) }); return () => window.cancelAnimationFrame(frame) }, [location.pathname, location.hash])
   const toggleTheme = () => setTheme((current) => current === 'dark' ? 'light' : 'dark')
-  return <><Header theme={theme} mobileNavOpen={mobileNavOpen} onThemeToggle={toggleTheme} onMobileNavToggle={setMobileNavOpen} onCreateRecipe={() => navigate('/recetas')} /><Routes><Route path="/" element={<HomePage />} /><Route path="/recetas" element={<RecipesPage />} /><Route path="/diario" element={<JournalPage />} /><Route path="*" element={<HomePage />} /></Routes></>
+  return <><Header theme={theme} mobileNavOpen={mobileNavOpen} onThemeToggle={toggleTheme} onMobileNavToggle={setMobileNavOpen} onCreateRecipe={() => navigate('/recetas', { state: { openRecipeForm: true } })} /><Routes><Route path="/" element={<HomePage />} /><Route path="/recetas" element={<RecipesPage />} /><Route path="/diario" element={<JournalPage />} /><Route path="*" element={<HomePage />} /></Routes></>
 }
 
 function App() { return <BrowserRouter><AppLayout /></BrowserRouter> }
