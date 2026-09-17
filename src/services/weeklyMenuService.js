@@ -87,6 +87,21 @@ export async function updateMeal({ id, date, mealType, recipeName, ingredients =
   return mapMeal(data)
 }
 
+export async function moveOrSwapMeals({ sourceId, sourceDate, sourceMealType, targetId = null, targetDate, targetMealType, userId = HARDCODED_USER_ID }) {
+  const { data, error } = await getSupabaseClient().rpc('move_or_swap_weekly_meals', {
+    p_user_id: userId,
+    p_source_id: String(sourceId),
+    p_source_date: sourceDate,
+    p_source_meal_type: sourceMealType,
+    p_target_id: targetId ? String(targetId) : null,
+    p_target_date: targetDate,
+    p_target_meal_type: targetMealType,
+  })
+
+  if (error) throw new Error(getError(error, 'No se pudo mover la comida.'))
+  return (data || []).map(mapMeal)
+}
+
 export async function deleteMeal({ id, userId = HARDCODED_USER_ID }) {
   const { error } = await getSupabaseClient()
     .from(TABLE_NAME)
