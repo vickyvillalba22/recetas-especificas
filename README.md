@@ -49,3 +49,21 @@ next.config.mjs       Configuración de Next.js
 ```
 
 Firebase Authentication y Cloud Firestore se incorporarán en la siguiente etapa. Los datos temporales se reinician al recargar la aplicación.
+
+## Configuración administrativa
+
+Las operaciones administrativas usan Firebase Admin SDK únicamente del lado servidor. Para asignar el primer administrador, crea un `.env.local` con estas variables privadas:
+
+```env
+FIREBASE_PROJECT_ID=tu-project-id
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-...@tu-project-id.iam.gserviceaccount.com
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+```
+
+Luego ejecuta:
+
+```bash
+npm run admin:bootstrap -- tu-email@gmail.com
+```
+
+Después, cierra sesión y vuelve a ingresar para renovar el token con el rol `admin`. Las credenciales privadas nunca deben comenzar con `NEXT_PUBLIC_` ni subirse al repositorio.

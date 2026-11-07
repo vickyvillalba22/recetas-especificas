@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Leaf, Menu, Moon, Plus, Sun } from '../ui/icons'
 
-export function Header({ theme, mobileNavOpen, onThemeToggle, onMobileNavToggle, onCreateRecipe }) {
+export function Header({ theme, mobileNavOpen, onThemeToggle, onMobileNavToggle, onCreateRecipe, user, isAdmin, onLogout }) {
   const pathname = usePathname()
   const closeMobileNav = () => onMobileNavToggle(false)
   const homePath = pathname === '/' ? '' : '/'
@@ -21,7 +21,8 @@ export function Header({ theme, mobileNavOpen, onThemeToggle, onMobileNavToggle,
           <Link href={`${homePath}#compras`}>Lista de compras</Link>
           <Link href="/recetas">Mis recetas</Link>
           <Link href="/diario">Diario</Link>
-          <Link href="/login">Ingresar</Link>
+          {isAdmin && <Link href="/admin">Admin</Link>}
+          {user ? <button onClick={onLogout} type="button" className="hover:text-coral">Cerrar sesión</button> : <Link href="/login">Ingresar</Link>}
         </nav>
         <div className="flex items-center gap-2">
           <button onClick={onThemeToggle} className="grid h-10 w-10 place-items-center rounded-full border border-ink/15 text-ink/70 transition hover:bg-white dark:border-cream/15 dark:text-cream/80 dark:hover:bg-ink-soft" aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}>{theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}</button>
@@ -34,7 +35,8 @@ export function Header({ theme, mobileNavOpen, onThemeToggle, onMobileNavToggle,
         <Link onClick={closeMobileNav} className="rounded-xl px-3 py-3 hover:bg-white dark:hover:bg-ink-soft" href={`${homePath}#compras`}>Lista de compras</Link>
         <Link onClick={closeMobileNav} className="rounded-xl px-3 py-3 hover:bg-white dark:hover:bg-ink-soft" href="/recetas">Mis recetas</Link>
         <Link onClick={closeMobileNav} className="rounded-xl px-3 py-3 hover:bg-white dark:hover:bg-ink-soft" href="/diario">Diario</Link>
-        <Link onClick={closeMobileNav} className="rounded-xl px-3 py-3 hover:bg-white dark:hover:bg-ink-soft" href="/login">Ingresar</Link>
+        {isAdmin && <Link onClick={closeMobileNav} className="rounded-xl px-3 py-3 hover:bg-white dark:hover:bg-ink-soft" href="/admin">Admin</Link>}
+        {user ? <button onClick={() => { closeMobileNav(); onLogout() }} type="button" className="rounded-xl px-3 py-3 text-left hover:bg-white dark:hover:bg-ink-soft">Cerrar sesión</button> : <Link onClick={closeMobileNav} className="rounded-xl px-3 py-3 hover:bg-white dark:hover:bg-ink-soft" href="/login">Ingresar</Link>}
         <button onClick={onThemeToggle} className="mt-2 flex items-center justify-center gap-2 rounded-xl border border-ink/10 px-3 py-3 text-ink/80 dark:border-cream/15 dark:text-cream/80">{theme === 'dark' ? <><Sun size={16} /> Modo claro</> : <><Moon size={16} /> Modo oscuro</>}</button>
         <button onClick={() => { closeMobileNav(); onCreateRecipe() }} className="mt-2 flex items-center justify-center gap-2 rounded-full bg-coral px-5 py-3 font-bold text-white"><Plus size={16} /> Agregar receta</button>
       </div></nav>}
