@@ -1,13 +1,15 @@
+'use client'
+
 import { useEffect, useState } from 'react'
 import { DndContext, DragOverlay, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Footer } from '../components/home/Footer'
 import { HeroSection } from '../components/home/HeroSection'
 import { ShoppingList } from '../components/home/ShoppingList'
 import { WeeklyMenu } from '../components/home/WeeklyMenu'
 import { CROSS_WEEK_DRAG_ENABLED, mealTimes } from '../components/home/weeklyMenuConstants'
 import { Check, CirclePlus, Leaf, X } from '../components/ui/icons'
-import { createMeal, getWeeklyMenu, moveOrSwapMeals, updateMeal } from '../services/weeklyMenuService'
+import { createMeal, getWeeklyMenu, moveOrSwapMeals, updateMeal } from '../services/mockWeeklyMenuService'
 
 const weekdays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
 const initialMenu = Object.fromEntries(weekdays.map((day) => [day, { Desayuno: null, Almuerzo: null, Merienda: null, Cena: null }]))
@@ -171,8 +173,8 @@ function MealModal({ target, days, onClose, onSubmit, error }) {
 }
 
 export function HomePage() {
-  const location = useLocation()
-  const navigate = useNavigate()
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [menu, setMenu] = useState(initialMenu)
   const [weekStart, setWeekStart] = useState(() => getMonday(new Date()))
   const [menuLoading, setMenuLoading] = useState(true)
@@ -230,14 +232,23 @@ export function HomePage() {
   }
 
   useEffect(() => {
-    if (!location.state?.recipeToAdd) return
+    if (!searchParams.get('addRecipe')) return
+    let recipeToAdd = null
+    try {
+      recipeToAdd = JSON.parse(sessionStorage.getItem('sibo-recipe-to-add') || 'null')
+      sessionStorage.removeItem('sibo-recipe-to-add')
+    } catch {}
+    if (!recipeToAdd) {
+      router.replace('/', { scroll: false })
+      return
+    }
     setMealTarget({
       day: 'Lunes',
       meal: 'Cena',
-      recipe: location.state.recipeToAdd,
+      recipe: recipeToAdd,
     })
-    navigate('/', { replace: true, state: null })
-  }, [location.state, navigate])
+    router.replace('/', { scroll: false })
+  }, [router, searchParams])
 
   useEffect(() => {
     let active = true

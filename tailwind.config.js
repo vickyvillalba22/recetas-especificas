@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: 'class',
-  content: ['./index.html', './src/**/*.{js,jsx}'],
+  content: ['./src/app/**/*.{js,jsx}', './src/components/**/*.{js,jsx}'],
   theme: {
     extend: {
       fontFamily: { sans: ['DM Sans', 'sans-serif'], display: ['Fraunces', 'serif'] },

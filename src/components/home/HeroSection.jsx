@@ -1,3 +1,5 @@
+'use client'
+
 import { useDroppable } from '@dnd-kit/core'
 
 function WeekArrow({ direction, weekOffset, onClick, children, disabled, dropDisabled }) {

@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useState } from 'react'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { CirclePlus, Clock3 } from '../ui/icons'

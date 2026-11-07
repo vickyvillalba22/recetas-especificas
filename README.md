@@ -1,48 +1,51 @@
 # sibo.decis
 
-Boilerplate de una aplicación web para planificar comidas y organizar una lista de compras siguiendo una alimentación baja en FODMAP. Incluye un asistente de recetas conectado a Gemini.
+Aplicación web para planificar comidas y organizar una lista de compras siguiendo una alimentación baja en FODMAP.
+
+Actualmente el proyecto está migrado a Next.js. La conexión con Firebase todavía no está implementada; el menú, las recetas y el diario utilizan datos temporales en memoria para validar la interfaz.
 
 ## Requisitos
 
-- Node.js 20 o superior
-- Una API key de Google AI Studio
+- Node.js 20.9 o superior.
 
 ## Instalación
 
 ```bash
 npm install
-copy .env.example .env
 ```
 
-Edita `.env` y agrega tu clave:
-
-```env
-GEMINI_API_KEY=tu_api_key_de_gemini
-PORT=3001
-```
-
-Inicia el frontend y el backend en desarrollo:
+## Desarrollo
 
 ```bash
 npm run dev
 ```
 
-La interfaz estará en `http://localhost:5173`. Vite redirige las llamadas `/api` al servidor Express, que corre en `http://localhost:3001` y expone `POST /api/recipe-suggestions`.
+La aplicación estará disponible en `http://localhost:3000`.
 
 ## Scripts
 
-- `npm run dev`: Vite y la API en modo desarrollo.
-- `npm run build`: genera el build de producción del frontend.
-- `npm run preview`: previsualiza el build.
-- `npm start`: inicia solo la API.
+- `npm run dev`: inicia Next.js en desarrollo.
+- `npm run build`: genera el build de producción.
+- `npm start`: inicia el build de producción.
+
+## Rutas actuales
+
+- `/`: menú principal.
+- `/bienvenida`: bienvenida inicial.
+- `/login`: placeholder de inicio de sesión.
+- `/registro`: placeholder de registro.
+- `/recetas`: recetas temporales.
+- `/diario`: diario temporal.
+- `/admin`: placeholder del panel administrativo.
 
 ## Estructura
 
 ```text
-src/                 Interfaz React y estilos Tailwind
-server/index.js      API Express y helper de @google/genai
-.env.example         Variables de entorno documentadas
-vite.config.js       Configuración de Vite
+src/app/              Rutas y layouts de Next.js App Router
+src/components/       Componentes reutilizables de React
+src/services/mock*    Servicios temporales en memoria
+src/app/globals.css   Estilos globales y configuración Tailwind
+next.config.mjs       Configuración de Next.js
 ```
 
-La API key se consume únicamente en el backend. No uses el prefijo `VITE_` para esta variable, ya que Vite expondría su valor al cliente. Las sugerencias no sustituyen el consejo de un profesional de salud.
+Firebase Authentication y Cloud Firestore se incorporarán en la siguiente etapa. Los datos temporales se reinician al recargar la aplicación.
