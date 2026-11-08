@@ -13,7 +13,11 @@ function readTheme() {
   }
 }
 
-const protectedPaths = new Set(['/', '/recetas', '/diario', '/admin'])
+const protectedPaths = new Set(['/', '/recetas', '/mis-recetas', '/diario'])
+
+function isAdminPath(pathname) {
+  return pathname === '/admin' || pathname.startsWith('/admin/')
+}
 
 function AppShellContent({ children }) {
   const router = useRouter()
@@ -34,8 +38,8 @@ function AppShellContent({ children }) {
   }, [pathname])
 
   useEffect(() => {
-    if (!loading && !user && protectedPaths.has(pathname)) router.replace('/bienvenida')
-    if (!loading && user && pathname === '/admin' && !isAdmin) router.replace('/')
+    if (!loading && !user && (protectedPaths.has(pathname) || isAdminPath(pathname))) router.replace('/bienvenida')
+    if (!loading && user && isAdminPath(pathname) && !isAdmin) router.replace('/')
   }, [isAdmin, loading, pathname, router, user])
 
   useEffect(() => {
@@ -64,8 +68,8 @@ function AppShellContent({ children }) {
     }
   }
 
-  const protectedRoute = protectedPaths.has(pathname)
-  const adminUnauthorized = pathname === '/admin' && user && !isAdmin
+  const protectedRoute = protectedPaths.has(pathname) || isAdminPath(pathname)
+  const adminUnauthorized = isAdminPath(pathname) && user && !isAdmin
   const shouldShowApp = !protectedRoute || (user && !adminUnauthorized)
 
   return (
@@ -75,7 +79,7 @@ function AppShellContent({ children }) {
         mobileNavOpen={mobileNavOpen}
         onThemeToggle={toggleTheme}
         onMobileNavToggle={setMobileNavOpen}
-        onCreateRecipe={() => router.push('/recetas?new=1')}
+        onCreateRecipe={() => router.push('/mis-recetas?new=1')}
         user={user}
         isAdmin={isAdmin}
         onLogout={handleLogout}

@@ -2,7 +2,7 @@
 
 Aplicación web para planificar comidas y organizar una lista de compras siguiendo una alimentación baja en FODMAP.
 
-Actualmente el proyecto está migrado a Next.js. La conexión con Firebase todavía no está implementada; el menú, las recetas y el diario utilizan datos temporales en memoria para validar la interfaz.
+Actualmente el proyecto está migrado a Next.js y utiliza Firebase Authentication y Cloud Firestore para usuarios, menú semanal, diario, recetas y listas de compras.
 
 ## Requisitos
 
@@ -34,21 +34,23 @@ La aplicación estará disponible en `http://localhost:3000`.
 - `/bienvenida`: bienvenida inicial.
 - `/login`: placeholder de inicio de sesión.
 - `/registro`: placeholder de registro.
-- `/recetas`: recetas temporales.
-- `/diario`: diario temporal.
+- `/recetas`: galería de recetas generales.
+- `/mis-recetas`: recetas personales del usuario.
+- `/diario`: diario personal.
 - `/admin`: placeholder del panel administrativo.
+- `/admin/recetas`: gestión administrativa de recetas generales.
 
 ## Estructura
 
 ```text
 src/app/              Rutas y layouts de Next.js App Router
 src/components/       Componentes reutilizables de React
-src/services/mock*    Servicios temporales en memoria
+src/services/         Servicios de Firebase y helpers de Firestore
 src/app/globals.css   Estilos globales y configuración Tailwind
 next.config.mjs       Configuración de Next.js
 ```
 
-Firebase Authentication y Cloud Firestore se incorporarán en la siguiente etapa. Los datos temporales se reinician al recargar la aplicación.
+Los datos actuales se guardan por usuario en Firebase. Los datos del menú, las recetas y el diario se separan por usuario; las recetas generales se almacenan en `publicRecipes`.
 
 ## Configuración administrativa
 

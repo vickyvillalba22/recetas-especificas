@@ -110,7 +110,10 @@ export function AdminDashboard() {
             <h1 className="mt-3 font-display text-4xl">Usuarios</h1>
             <p className="mt-2 text-sm text-ink/60 dark:text-cream/60">Gestioná las cuentas registradas sin acceder a sus datos privados.</p>
           </div>
-          <Link href="/" className="rounded-full border border-ink/15 px-5 py-3 text-sm font-bold text-ink/75 transition hover:bg-white dark:border-cream/15 dark:text-cream/80 dark:hover:bg-ink-soft">Volver al inicio</Link>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/admin/recetas" className="rounded-full bg-moss px-5 py-3 text-sm font-bold text-white transition hover:bg-ink">Gestionar recetas generales</Link>
+            <Link href="/" className="rounded-full border border-ink/15 px-5 py-3 text-sm font-bold text-ink/75 transition hover:bg-white dark:border-cream/15 dark:text-cream/80 dark:hover:bg-ink-soft">Volver al inicio</Link>
+          </div>
         </div>
 
         <div className="mb-8 rounded-3xl border border-ink/10 bg-white p-6 shadow-soft dark:border-cream/10 dark:bg-ink-soft dark:shadow-soft-dark">

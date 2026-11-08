@@ -9,7 +9,8 @@ import { ShoppingList } from '../components/home/ShoppingList'
 import { WeeklyMenu } from '../components/home/WeeklyMenu'
 import { CROSS_WEEK_DRAG_ENABLED, mealTimes } from '../components/home/weeklyMenuConstants'
 import { Check, CirclePlus, Leaf, X } from '../components/ui/icons'
-import { createMeal, getWeeklyMenu, moveOrSwapMeals, updateMeal } from '../services/mockWeeklyMenuService'
+import { getShoppingList, saveShoppingList } from '../services/shoppingListService'
+import { createMeal, getWeeklyMenu, moveOrSwapMeals, updateMeal } from '../services/weeklyMenuService'
 
 const weekdays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
 const initialMenu = Object.fromEntries(weekdays.map((day) => [day, { Desayuno: null, Almuerzo: null, Merienda: null, Cena: null }]))
@@ -33,6 +34,11 @@ function getShoppingItems(menu) {
     ),
   )
   return [...grouped.values()]
+}
+
+function mergeShoppingItems(items, savedItems = []) {
+  const savedChecks = new Map(savedItems.map((item) => [item.name.trim().toLocaleLowerCase(), Boolean(item.checked)]))
+  return items.map((item) => ({ ...item, checked: savedChecks.get(item.name.toLocaleLowerCase()) || false }))
 }
 
 function getMonday(date) {
@@ -225,10 +231,19 @@ export function HomePage() {
     const savedSource = savedMeals.find((meal) => String(meal.id) === String(sourceValue.id))
     if (!savedSource) throw new Error('No pudimos confirmar el movimiento de la comida.')
 
-    setMenu((current) => ({
-      ...current,
-      [targetDay]: { ...current[targetDay], [targetMeal]: savedSource },
-    }))
+    const nextTargetMenu = {
+      ...menu,
+      [targetDay]: { ...menu[targetDay], [targetMeal]: savedSource },
+    }
+    const sourceMenuAfter = {
+      ...dragOrigin.menu,
+      [sourceDay]: { ...dragOrigin.menu[sourceDay], [sourceMeal]: targetValue || null },
+    }
+    setMenu(nextTargetMenu)
+    await Promise.all([
+      resetShoppingListForMenu(sourceMenuAfter, dragOrigin.weekStart),
+      resetShoppingListForMenu(nextTargetMenu, weekStart),
+    ])
   }
 
   useEffect(() => {
@@ -254,12 +269,24 @@ export function HomePage() {
     let active = true
     setMenuLoading(true)
     if (!mealMoveSaving) setMenuError('')
-    getWeeklyMenu({
-      startDate: formatDateKey(weekStart),
-      endDate: formatDateKey(addDays(weekStart, 6)),
-    })
-      .then((rows) => {
-        if (active) setMenu(menuFromRows(rows, weekStart))
+    const weekId = formatDateKey(weekStart)
+    Promise.all([
+      getWeeklyMenu({
+        startDate: weekId,
+        endDate: formatDateKey(addDays(weekStart, 6)),
+      }),
+      getShoppingList({ weekId }),
+    ])
+      .then(async ([rows, savedList]) => {
+        if (!active) return
+        const nextMenu = menuFromRows(rows, weekStart)
+        const currentItems = getShoppingItems(nextMenu)
+        const persistedItems = mergeShoppingItems(currentItems, savedList?.items)
+        setMenu(nextMenu)
+        setChecked(persistedItems.filter((item) => item.checked).map((item) => item.name))
+        if (!savedList || JSON.stringify(savedList.items) !== JSON.stringify(persistedItems)) {
+          await saveShoppingList({ weekId, items: persistedItems })
+        }
       })
       .catch((error) => {
         if (active) setMenuError(error.message)
@@ -292,6 +319,15 @@ export function HomePage() {
     return () => window.clearTimeout(timer)
   }, [showMotivation])
 
+  const resetShoppingListForMenu = async (nextMenu, nextWeekStart = weekStart) => {
+    const weekId = formatDateKey(nextWeekStart)
+    const items = getShoppingItems(nextMenu).map((item) => ({ ...item, checked: false }))
+    setChecked([])
+    await saveShoppingList({ weekId, items })
+  }
+
+  const confirmMenuChange = () => window.confirm('¿Seguro querés cambiar el menú?\nSe eliminarán los checks de la lista de compras.')
+
   const persistMeal = async ({ day, meal, name, ingredients }) => {
     const dayIndex = weekdays.indexOf(day)
     const currentMeal = menu[day]?.[meal]
@@ -309,10 +345,12 @@ export function HomePage() {
           recipeName: name,
           ingredients,
         })
-    setMenu((current) => ({
-      ...current,
-      [day]: { ...current[day], [meal]: savedMeal },
-    }))
+    const nextMenu = {
+      ...menu,
+      [day]: { ...menu[day], [meal]: savedMeal },
+    }
+    setMenu(nextMenu)
+    return nextMenu
   }
 
   const saveManualMeal = async (event) => {
@@ -327,9 +365,11 @@ export function HomePage() {
       .map((item) => item.trim())
       .filter(Boolean)
     if (!name) return
+    if (!confirmMenuChange()) return
     setMenuError('')
     try {
-      await persistMeal({ day, meal, name, ingredients })
+      const nextMenu = await persistMeal({ day, meal, name, ingredients })
+      await resetShoppingListForMenu(nextMenu)
       setMealTarget(null)
     } catch (error) {
       setMenuError(error.message)
@@ -344,6 +384,12 @@ export function HomePage() {
   }
 
   const completeCrossWeekMove = async ({ source, dropTarget }) => {
+    if (!confirmMenuChange()) {
+      restoreDragOrigin()
+      setDragOrigin(null)
+      setActiveDrag(null)
+      return
+    }
     setMealMoveSaving(true)
     setMenuError('')
     try {
@@ -434,6 +480,7 @@ export function HomePage() {
     const sourceValue = menu[sourceDay]?.[sourceMeal]
     const targetValue = menu[targetDay]?.[targetMeal]
     if (!sourceValue) return
+    if (!confirmMenuChange()) return
 
     setMealMoveSaving(true)
     setMenuError('')
@@ -446,13 +493,15 @@ export function HomePage() {
         targetDate: formatDateKey(addDays(weekStart, target.dayIndex)),
         targetMealType: targetMeal.toLowerCase(),
       })
-      setMenu((current) => swapMenuSlots(current, {
+      const nextMenu = swapMenuSlots(menu, {
         dayIndex: source.sourceDayIndex,
         mealIndex: source.sourceMealIndex,
       }, {
         dayIndex: target.dayIndex,
         mealIndex: target.mealIndex,
-      }))
+      })
+      setMenu(nextMenu)
+      await resetShoppingListForMenu(nextMenu)
     } catch (error) {
       setMenuError(error.message)
     } finally {
@@ -484,6 +533,19 @@ export function HomePage() {
     window.setTimeout(() => setCopied(false), 2000)
   }
 
+  const toggleShoppingItem = async (name) => {
+    const nextChecked = checked.includes(name) ? checked.filter((item) => item !== name) : [...checked, name]
+    setChecked(nextChecked)
+    try {
+      await saveShoppingList({
+        weekId: formatDateKey(weekStart),
+        items: shoppingItems.map((item) => ({ ...item, checked: nextChecked.includes(item.name) })),
+      })
+    } catch (error) {
+      setMenuError(error.message)
+    }
+  }
+
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd} onDragCancel={handleDragCancel}>
       <div className="min-h-screen bg-cream text-ink dark:bg-ink-dark dark:text-cream">
@@ -508,7 +570,7 @@ export function HomePage() {
           {menuError && <p className="mb-4 rounded-xl bg-coral/10 px-4 py-3 text-sm text-coral">No pudimos cargar el menú guardado: {menuError}</p>}
           <div className="grid gap-6 xl:grid-cols-[1fr_310px]">
             <WeeklyMenu menu={menu} weekStart={weekStart} weekdays={weekdays} onAddMeal={setMealTarget} formatDayName={formatDayName} formatMonthShort={formatMonthShort} activeDrag={activeDrag} dragDisabled={mealMoveSaving} />
-            <ShoppingList shoppingItems={shoppingItems} checked={checked} toggleItem={(name) => setChecked((current) => (current.includes(name) ? current.filter((item) => item !== name) : [...current, name]))} onCopy={copyShoppingList} copied={copied} />
+             <ShoppingList shoppingItems={shoppingItems} checked={checked} toggleItem={toggleShoppingItem} onCopy={copyShoppingList} copied={copied} />
           </div>
         </main>
         <Footer />

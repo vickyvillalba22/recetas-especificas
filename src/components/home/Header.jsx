@@ -19,7 +19,8 @@ export function Header({ theme, mobileNavOpen, onThemeToggle, onMobileNavToggle,
         <nav className="hidden items-center gap-8 text-sm font-medium text-ink/65 dark:text-cream/65 md:flex">
           <Link className="text-moss dark:text-sun" href={`${homePath}#menu`}>Mi menú</Link>
           <Link href={`${homePath}#compras`}>Lista de compras</Link>
-          <Link href="/recetas">Mis recetas</Link>
+          <Link href="/recetas">Recetas generales</Link>
+          <Link href="/mis-recetas">Mis recetas</Link>
           <Link href="/diario">Diario</Link>
           {isAdmin && <Link href="/admin">Admin</Link>}
           {user ? <button onClick={onLogout} type="button" className="hover:text-coral">Cerrar sesión</button> : <Link href="/login">Ingresar</Link>}
@@ -33,7 +34,8 @@ export function Header({ theme, mobileNavOpen, onThemeToggle, onMobileNavToggle,
       {mobileNavOpen && <nav className="border-t border-ink/10 bg-cream px-4 py-4 dark:border-cream/10 dark:bg-ink-dark md:hidden"><div className="mx-auto flex max-w-[1440px] flex-col gap-1 text-sm font-semibold">
         <Link onClick={closeMobileNav} className="rounded-xl px-3 py-3 text-moss hover:bg-white dark:hover:bg-ink-soft" href={`${homePath}#menu`}>Mi menú</Link>
         <Link onClick={closeMobileNav} className="rounded-xl px-3 py-3 hover:bg-white dark:hover:bg-ink-soft" href={`${homePath}#compras`}>Lista de compras</Link>
-        <Link onClick={closeMobileNav} className="rounded-xl px-3 py-3 hover:bg-white dark:hover:bg-ink-soft" href="/recetas">Mis recetas</Link>
+        <Link onClick={closeMobileNav} className="rounded-xl px-3 py-3 hover:bg-white dark:hover:bg-ink-soft" href="/recetas">Recetas generales</Link>
+        <Link onClick={closeMobileNav} className="rounded-xl px-3 py-3 hover:bg-white dark:hover:bg-ink-soft" href="/mis-recetas">Mis recetas</Link>
         <Link onClick={closeMobileNav} className="rounded-xl px-3 py-3 hover:bg-white dark:hover:bg-ink-soft" href="/diario">Diario</Link>
         {isAdmin && <Link onClick={closeMobileNav} className="rounded-xl px-3 py-3 hover:bg-white dark:hover:bg-ink-soft" href="/admin">Admin</Link>}
         {user ? <button onClick={() => { closeMobileNav(); onLogout() }} type="button" className="rounded-xl px-3 py-3 text-left hover:bg-white dark:hover:bg-ink-soft">Cerrar sesión</button> : <Link onClick={closeMobileNav} className="rounded-xl px-3 py-3 hover:bg-white dark:hover:bg-ink-soft" href="/login">Ingresar</Link>}
