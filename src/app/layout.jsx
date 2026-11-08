@@ -8,6 +8,10 @@ export const metadata = {
   },
   description: 'Planificador de comidas bajas en FODMAP',
   applicationName: 'sibo.decis',
+  icons: {
+    icon: '/hugeicons--organic-food.svg',
+    shortcut: '/hugeicons--organic-food.svg',
+  },
 }
 
 export default function RootLayout({ children }) {

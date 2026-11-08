@@ -10,7 +10,7 @@ import { WeeklyMenu } from '../components/home/WeeklyMenu'
 import { CROSS_WEEK_DRAG_ENABLED, mealTimes } from '../components/home/weeklyMenuConstants'
 import { Check, CirclePlus, Leaf, X } from '../components/ui/icons'
 import { getShoppingList, saveShoppingList } from '../services/shoppingListService'
-import { createMeal, getWeeklyMenu, moveOrSwapMeals, updateMeal } from '../services/weeklyMenuService'
+import { createMeal, deleteMeal, getWeeklyMenu, moveOrSwapMeals, updateMeal } from '../services/weeklyMenuService'
 
 const weekdays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
 const initialMenu = Object.fromEntries(weekdays.map((day) => [day, { Desayuno: null, Almuerzo: null, Merienda: null, Cena: null }]))
@@ -20,25 +20,57 @@ function getMealIngredients(meal) {
   return Array.isArray(meal?.ingredients) ? meal.ingredients : []
 }
 
-function getShoppingItems(menu) {
+function groupShoppingItems(ingredients) {
   const grouped = new Map()
-  Object.values(menu).forEach((day) =>
-    Object.values(day).forEach((meal) =>
-      getMealIngredients(meal).forEach((ingredient) => {
-        const name = ingredient.trim()
-        if (!name) return
-        const key = name.toLocaleLowerCase()
-        const current = grouped.get(key)
-        grouped.set(key, current ? { ...current, count: current.count + 1 } : { name, count: 1 })
-      }),
-    ),
-  )
+  ingredients.forEach((ingredient) => {
+    const name = String(ingredient || '').trim()
+    if (!name) return
+    const key = name.toLocaleLowerCase()
+    const current = grouped.get(key)
+    grouped.set(key, current ? { ...current, count: current.count + 1 } : { name, count: 1, checked: false })
+  })
   return [...grouped.values()]
 }
 
-function mergeShoppingItems(items, savedItems = []) {
-  const savedChecks = new Map(savedItems.map((item) => [item.name.trim().toLocaleLowerCase(), Boolean(item.checked)]))
-  return items.map((item) => ({ ...item, checked: savedChecks.get(item.name.toLocaleLowerCase()) || false }))
+function getShoppingItems(menu) {
+  const ingredients = []
+  Object.values(menu).forEach((day) =>
+    Object.values(day).forEach((meal) => ingredients.push(...getMealIngredients(meal))),
+  )
+  return groupShoppingItems(ingredients)
+}
+
+function getNewShoppingItems(ingredients, previousIngredients = []) {
+  const previousNames = new Set(previousIngredients.map((ingredient) => String(ingredient || '').trim().toLocaleLowerCase()))
+  return groupShoppingItems(ingredients.filter((ingredient) => !previousNames.has(String(ingredient || '').trim().toLocaleLowerCase())))
+}
+
+function mergeShoppingItems(items, additions = []) {
+  const merged = items.map((item) => ({ ...item }))
+  const indexes = new Map(merged.map((item, index) => [item.name.trim().toLocaleLowerCase(), index]))
+
+  additions.forEach((item) => {
+    const key = item.name.trim().toLocaleLowerCase()
+    const index = indexes.get(key)
+    if (index === undefined) {
+      indexes.set(key, merged.length)
+      merged.push({ ...item, checked: false })
+      return
+    }
+    merged[index] = { ...merged[index], count: (Number(merged[index].count) || 1) + (Number(item.count) || 1) }
+  })
+
+  return merged
+}
+
+function removeShoppingIngredients(items, ingredients) {
+  const removals = new Map(groupShoppingItems(ingredients).map((item) => [item.name.toLocaleLowerCase(), item.count]))
+  return items.flatMap((item) => {
+    const removalCount = removals.get(item.name.trim().toLocaleLowerCase())
+    if (!removalCount) return [item]
+    const remainingCount = (Number(item.count) || 1) - removalCount
+    return remainingCount > 0 ? [{ ...item, count: remainingCount }] : []
+  })
 }
 
 function getMonday(date) {
@@ -126,26 +158,28 @@ function swapMenuSlots(menu, source, target) {
   }
 }
 
-function MealModal({ target, days, onClose, onSubmit, error }) {
+function MealModal({ target, days, onClose, onSubmit, error, loading }) {
+  const isEditing = Boolean(target.editing)
+
   return (
-    <div onClick={(event) => event.target === event.currentTarget && onClose()} className="fixed inset-0 z-40 grid place-items-center bg-ink/50 p-4 backdrop-blur-sm">
+    <div onClick={(event) => event.target === event.currentTarget && !loading && onClose()} className="fixed inset-0 z-40 grid place-items-center bg-ink/50 p-4 backdrop-blur-sm">
       <div onClick={(event) => event.stopPropagation()} className="w-full max-w-md rounded-3xl bg-cream p-6 shadow-2xl dark:bg-ink-soft dark:text-cream sm:p-8">
         <div className="mb-6 flex items-start justify-between">
           <div>
             <span className="mb-3 inline-flex rounded-full bg-sage p-2 text-moss dark:bg-moss/30 dark:text-sage">
               <CirclePlus size={18} />
             </span>
-            <h2 className="font-display text-3xl">Agregar comida</h2>
-            <p className="mt-1 text-sm text-ink/50 dark:text-cream/50">Completa tu menú a tu manera.</p>
+            <h2 className="font-display text-3xl">{isEditing ? 'Editar comida' : 'Agregar comida'}</h2>
+            <p className="mt-1 text-sm text-ink/50 dark:text-cream/50">{isEditing ? 'Editá los datos de esta comida.' : 'Completa tu menú a tu manera.'}</p>
           </div>
-          <button onClick={onClose} className="rounded-full p-2 hover:bg-black/5 dark:hover:bg-cream/10" aria-label="Cerrar">
+          <button onClick={onClose} disabled={loading} className="rounded-full p-2 hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-cream/10" aria-label="Cerrar">
             <X size={20} />
           </button>
         </div>
         <form onSubmit={onSubmit} className="space-y-5">
           <label className="block text-sm font-bold">
             Día
-            <select name="day" defaultValue={target.day} className="field mt-2">
+            <select name="day" defaultValue={target.day} disabled={loading} className="field mt-2">
               {days.map((day) => (
                 <option key={day}>{day}</option>
               ))}
@@ -153,7 +187,7 @@ function MealModal({ target, days, onClose, onSubmit, error }) {
           </label>
           <label className="block text-sm font-bold">
             Momento
-            <select name="meal" defaultValue={target.meal || 'Cena'} className="field mt-2">
+            <select name="meal" defaultValue={target.meal || 'Cena'} disabled={loading} className="field mt-2">
               <option>Desayuno</option>
               <option>Almuerzo</option>
               <option>Merienda</option>
@@ -162,17 +196,55 @@ function MealModal({ target, days, onClose, onSubmit, error }) {
           </label>
           <label className="block text-sm font-bold">
             Nombre de la receta
-            <input autoFocus required name="name" defaultValue={target.recipe?.name || ''} className="field mt-2" placeholder="Ej. Ensalada de pollo y quinoa" />
+            <input autoFocus required name="name" defaultValue={target.recipe?.name || ''} disabled={loading} className="field mt-2" placeholder="Ej. Ensalada de pollo y quinoa" />
           </label>
           <label className="block text-sm font-bold">
-            Ingredientes <span className="font-normal text-ink/40 dark:text-cream/40">(separados por comas)</span>
-            <textarea required name="ingredients" defaultValue={target.recipe?.ingredients?.join(', ') || ''} className="field mt-2 min-h-24" placeholder="Ej. tomate, lechuga, pollo" />
+            Ingredientes <span className="font-normal text-ink/40 dark:text-cream/40">(opcional, separados por comas)</span>
+            <textarea name="ingredients" defaultValue={target.recipe?.ingredients?.join(', ') || ''} disabled={loading} className="field mt-2 min-h-24" placeholder="Ej. tomate, lechuga, pollo" />
           </label>
           {error && <p className="rounded-xl bg-coral/10 p-3 text-sm text-coral">{error}</p>}
-          <button type="submit" className="w-full rounded-full bg-moss py-3.5 text-sm font-bold text-white">
-            Guardar en el menú
+          <button type="submit" disabled={loading} className="w-full rounded-full bg-moss py-3.5 text-sm font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-60">
+            {loading ? 'Guardando cambios...' : isEditing ? 'Guardar cambios' : 'Guardar en el menú'}
           </button>
         </form>
+      </div>
+    </div>
+  )
+}
+
+function ClearListModal({ onClose, onConfirm }) {
+  return (
+    <div onClick={(event) => event.target === event.currentTarget && onClose()} className="fixed inset-0 z-50 grid place-items-center bg-ink/50 p-4 backdrop-blur-sm">
+      <div role="dialog" aria-modal="true" aria-labelledby="clear-list-title" className="w-full max-w-sm rounded-3xl bg-cream p-6 shadow-2xl dark:bg-ink-soft dark:text-cream sm:p-8">
+        <h2 id="clear-list-title" className="font-display text-2xl">¿Vaciar la lista?</h2>
+        <p className="mt-2 text-sm leading-relaxed text-ink/60 dark:text-cream/60">Se eliminarán todos los ingredientes y sus checks de esta semana.</p>
+        <div className="mt-6 flex gap-3">
+          <button onClick={onClose} type="button" className="flex-1 rounded-full border border-ink/15 px-4 py-3 text-sm font-bold text-ink/70 transition hover:bg-white dark:border-cream/15 dark:text-cream/70 dark:hover:bg-ink">
+            Cancelar
+          </button>
+          <button onClick={onConfirm} type="button" className="flex-1 rounded-full bg-coral px-4 py-3 text-sm font-bold text-white transition hover:opacity-90">
+            Vaciar lista
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function DeleteMealModal({ meal, onClose, onConfirm, loading }) {
+  return (
+    <div onClick={(event) => event.target === event.currentTarget && !loading && onClose()} className="fixed inset-0 z-50 grid place-items-center bg-ink/50 p-4 backdrop-blur-sm">
+      <div role="dialog" aria-modal="true" aria-labelledby="delete-meal-title" className="w-full max-w-sm rounded-3xl bg-cream p-6 shadow-2xl dark:bg-ink-soft dark:text-cream sm:p-8">
+        <h2 id="delete-meal-title" className="font-display text-2xl">¿Eliminar comida?</h2>
+        <p className="mt-2 text-sm leading-relaxed text-ink/60 dark:text-cream/60">¿Estás seguro de que querés eliminar <strong className="text-ink dark:text-cream">{meal.recipe.name}</strong> del menú?</p>
+        <div className="mt-6 flex gap-3">
+          <button onClick={onClose} disabled={loading} type="button" className="flex-1 rounded-full border border-ink/15 px-4 py-3 text-sm font-bold text-ink/70 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40 dark:border-cream/15 dark:text-cream/70 dark:hover:bg-ink">
+            Cancelar
+          </button>
+          <button onClick={onConfirm} disabled={loading} type="button" className="flex-1 rounded-full bg-coral px-4 py-3 text-sm font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60">
+            {loading ? 'Eliminando...' : 'Eliminar comida'}
+          </button>
+        </div>
       </div>
     </div>
   )
@@ -185,8 +257,12 @@ export function HomePage() {
   const [weekStart, setWeekStart] = useState(() => getMonday(new Date()))
   const [menuLoading, setMenuLoading] = useState(true)
   const [menuError, setMenuError] = useState('')
-  const [checked, setChecked] = useState([])
+  const [shoppingItems, setShoppingItems] = useState([])
+  const [showClearListModal, setShowClearListModal] = useState(false)
   const [mealTarget, setMealTarget] = useState(null)
+  const [mealSaving, setMealSaving] = useState(false)
+  const [mealToDelete, setMealToDelete] = useState(null)
+  const [mealDeleting, setMealDeleting] = useState(false)
   const [copied, setCopied] = useState(false)
   const [activeDrag, setActiveDrag] = useState(null)
   const [dragOrigin, setDragOrigin] = useState(null)
@@ -207,7 +283,7 @@ export function HomePage() {
       return 'light'
     }
   })
-  const shoppingItems = getShoppingItems(menu)
+  const checked = shoppingItems.filter((item) => item.checked).map((item) => item.name)
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }), useSensor(TouchSensor, { activationConstraint: { distance: 8 } }), useSensor(KeyboardSensor))
 
   const persistCrossWeekMove = async ({ source, dropTarget }) => {
@@ -235,15 +311,7 @@ export function HomePage() {
       ...menu,
       [targetDay]: { ...menu[targetDay], [targetMeal]: savedSource },
     }
-    const sourceMenuAfter = {
-      ...dragOrigin.menu,
-      [sourceDay]: { ...dragOrigin.menu[sourceDay], [sourceMeal]: targetValue || null },
-    }
     setMenu(nextTargetMenu)
-    await Promise.all([
-      resetShoppingListForMenu(sourceMenuAfter, dragOrigin.weekStart),
-      resetShoppingListForMenu(nextTargetMenu, weekStart),
-    ])
   }
 
   useEffect(() => {
@@ -280,11 +348,10 @@ export function HomePage() {
       .then(async ([rows, savedList]) => {
         if (!active) return
         const nextMenu = menuFromRows(rows, weekStart)
-        const currentItems = getShoppingItems(nextMenu)
-        const persistedItems = mergeShoppingItems(currentItems, savedList?.items)
+        const persistedItems = savedList ? savedList.items : getShoppingItems(nextMenu)
         setMenu(nextMenu)
-        setChecked(persistedItems.filter((item) => item.checked).map((item) => item.name))
-        if (!savedList || JSON.stringify(savedList.items) !== JSON.stringify(persistedItems)) {
+        setShoppingItems(persistedItems)
+        if (!savedList) {
           await saveShoppingList({ weekId, items: persistedItems })
         }
       })
@@ -319,15 +386,6 @@ export function HomePage() {
     return () => window.clearTimeout(timer)
   }, [showMotivation])
 
-  const resetShoppingListForMenu = async (nextMenu, nextWeekStart = weekStart) => {
-    const weekId = formatDateKey(nextWeekStart)
-    const items = getShoppingItems(nextMenu).map((item) => ({ ...item, checked: false }))
-    setChecked([])
-    await saveShoppingList({ weekId, items })
-  }
-
-  const confirmMenuChange = () => window.confirm('¿Seguro querés cambiar el menú?\nSe eliminarán los checks de la lista de compras.')
-
   const persistMeal = async ({ day, meal, name, ingredients }) => {
     const dayIndex = weekdays.indexOf(day)
     const currentMeal = menu[day]?.[meal]
@@ -353,6 +411,13 @@ export function HomePage() {
     return nextMenu
   }
 
+  const addIngredientsToShoppingList = async (ingredients) => {
+    if (!ingredients.length) return
+    const nextItems = mergeShoppingItems(shoppingItems, ingredients)
+    setShoppingItems(nextItems)
+    await saveShoppingList({ weekId: formatDateKey(weekStart), items: nextItems })
+  }
+
   const saveManualMeal = async (event) => {
     event.preventDefault()
     const form = new FormData(event.currentTarget)
@@ -365,14 +430,50 @@ export function HomePage() {
       .map((item) => item.trim())
       .filter(Boolean)
     if (!name) return
-    if (!confirmMenuChange()) return
+    const previousIngredients = getMealIngredients(menu[day]?.[meal])
+    const newShoppingItems = getNewShoppingItems(ingredients || [], previousIngredients)
     setMenuError('')
+    setMealSaving(true)
     try {
-      const nextMenu = await persistMeal({ day, meal, name, ingredients })
-      await resetShoppingListForMenu(nextMenu)
+      await persistMeal({ day, meal, name, ingredients })
+      await addIngredientsToShoppingList(newShoppingItems)
       setMealTarget(null)
     } catch (error) {
       setMenuError(error.message)
+    } finally {
+      setMealSaving(false)
+    }
+  }
+
+  const removeIngredientsFromShoppingList = async (ingredients) => {
+    if (!ingredients.length) return
+    const nextItems = removeShoppingIngredients(shoppingItems, ingredients)
+    if (JSON.stringify(nextItems) === JSON.stringify(shoppingItems)) return
+    setShoppingItems(nextItems)
+    await saveShoppingList({ weekId: formatDateKey(weekStart), items: nextItems })
+  }
+
+  const confirmDeleteMeal = async () => {
+    if (!mealToDelete) return
+    const target = mealToDelete
+    const dayIndex = weekdays.indexOf(target.day)
+    setMealDeleting(true)
+    setMenuError('')
+    try {
+      await deleteMeal({
+        id: target.recipe.id,
+        date: formatDateKey(addDays(weekStart, dayIndex)),
+      })
+      setMenu((current) => ({
+        ...current,
+        [target.day]: { ...current[target.day], [target.meal]: null },
+      }))
+      setMealToDelete(null)
+      await removeIngredientsFromShoppingList(getMealIngredients(target.recipe))
+    } catch (error) {
+      setMenuError(error.message)
+    } finally {
+      setMealDeleting(false)
     }
   }
 
@@ -384,12 +485,6 @@ export function HomePage() {
   }
 
   const completeCrossWeekMove = async ({ source, dropTarget }) => {
-    if (!confirmMenuChange()) {
-      restoreDragOrigin()
-      setDragOrigin(null)
-      setActiveDrag(null)
-      return
-    }
     setMealMoveSaving(true)
     setMenuError('')
     try {
@@ -480,7 +575,6 @@ export function HomePage() {
     const sourceValue = menu[sourceDay]?.[sourceMeal]
     const targetValue = menu[targetDay]?.[targetMeal]
     if (!sourceValue) return
-    if (!confirmMenuChange()) return
 
     setMealMoveSaving(true)
     setMenuError('')
@@ -501,7 +595,6 @@ export function HomePage() {
         mealIndex: target.mealIndex,
       })
       setMenu(nextMenu)
-      await resetShoppingListForMenu(nextMenu)
     } catch (error) {
       setMenuError(error.message)
     } finally {
@@ -534,13 +627,38 @@ export function HomePage() {
   }
 
   const toggleShoppingItem = async (name) => {
-    const nextChecked = checked.includes(name) ? checked.filter((item) => item !== name) : [...checked, name]
-    setChecked(nextChecked)
+    const nextItems = shoppingItems.map((item) => item.name === name ? { ...item, checked: !item.checked } : item)
+    setShoppingItems(nextItems)
     try {
       await saveShoppingList({
         weekId: formatDateKey(weekStart),
-        items: shoppingItems.map((item) => ({ ...item, checked: nextChecked.includes(item.name) })),
+        items: nextItems,
       })
+    } catch (error) {
+      setMenuError(error.message)
+    }
+  }
+
+  const removeShoppingItem = async (name) => {
+    const nextItems = shoppingItems.filter((item) => item.name !== name)
+    setShoppingItems(nextItems)
+    try {
+      await saveShoppingList({ weekId: formatDateKey(weekStart), items: nextItems })
+    } catch (error) {
+      setMenuError(error.message)
+    }
+  }
+
+  const clearShoppingList = async () => {
+    if (!shoppingItems.length) return
+    setShowClearListModal(true)
+  }
+
+  const confirmClearShoppingList = async () => {
+    setShowClearListModal(false)
+    setShoppingItems([])
+    try {
+      await saveShoppingList({ weekId: formatDateKey(weekStart), items: [] })
     } catch (error) {
       setMenuError(error.message)
     }
@@ -569,13 +687,15 @@ export function HomePage() {
           {mealMoveSaving && <p className="mb-4 text-sm text-ink/50 dark:text-cream/50">Guardando el movimiento...</p>}
           {menuError && <p className="mb-4 rounded-xl bg-coral/10 px-4 py-3 text-sm text-coral">No pudimos cargar el menú guardado: {menuError}</p>}
           <div className="grid gap-6 xl:grid-cols-[1fr_310px]">
-            <WeeklyMenu menu={menu} weekStart={weekStart} weekdays={weekdays} onAddMeal={setMealTarget} formatDayName={formatDayName} formatMonthShort={formatMonthShort} activeDrag={activeDrag} dragDisabled={mealMoveSaving} />
-             <ShoppingList shoppingItems={shoppingItems} checked={checked} toggleItem={toggleShoppingItem} onCopy={copyShoppingList} copied={copied} />
+            <WeeklyMenu menu={menu} weekStart={weekStart} weekdays={weekdays} onAddMeal={setMealTarget} onDeleteMeal={setMealToDelete} formatDayName={formatDayName} formatMonthShort={formatMonthShort} activeDrag={activeDrag} dragDisabled={mealMoveSaving || mealDeleting} />
+              <ShoppingList shoppingItems={shoppingItems} checked={checked} toggleItem={toggleShoppingItem} removeItem={removeShoppingItem} clearList={clearShoppingList} onCopy={copyShoppingList} copied={copied} />
           </div>
-        </main>
-        <Footer />
-        {mealTarget && <MealModal target={mealTarget} days={weekdays} onClose={() => setMealTarget(null)} onSubmit={saveManualMeal} error={menuError} />}
-      </div>
+         </main>
+         <Footer />
+         {mealTarget && <MealModal target={mealTarget} days={weekdays} onClose={() => setMealTarget(null)} onSubmit={saveManualMeal} error={menuError} loading={mealSaving} />}
+         {showClearListModal && <ClearListModal onClose={() => setShowClearListModal(false)} onConfirm={confirmClearShoppingList} />}
+         {mealToDelete && <DeleteMealModal meal={mealToDelete} onClose={() => setMealToDelete(null)} onConfirm={confirmDeleteMeal} loading={mealDeleting} />}
+       </div>
       <DragOverlay>{activeDrag ? <div className="rounded-xl bg-moss px-4 py-3 text-sm font-semibold text-white shadow-xl">{activeDrag.name}</div> : null}</DragOverlay>
     </DndContext>
   )

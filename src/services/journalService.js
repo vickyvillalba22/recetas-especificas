@@ -13,8 +13,15 @@ import {
 function formatJournalDate(value) {
   const date = firebaseTimestampToDate(value)
   return date
-    ? date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
+    ? date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
     : 'Sin fecha'
+}
+
+function formatJournalTime(value) {
+  const date = firebaseTimestampToDate(value)
+  return date
+    ? date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+    : 'Sin hora'
 }
 
 function mapJournalEntry(snapshot) {
@@ -24,6 +31,7 @@ function mapJournalEntry(snapshot) {
     userId: data.userId,
     text: data.text || '',
     date: formatJournalDate(data.createdAt),
+    time: formatJournalTime(data.createdAt),
     createdAt: firebaseTimestampToISOString(data.createdAt),
     updatedAt: firebaseTimestampToISOString(data.updatedAt),
   }
