@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Footer } from '../../../components/home/Footer'
 import { RecipeFormModal } from '../../../components/home/RecipeFormModal'
 import { RecipeGallery } from '../../../components/home/RecipeGallery'
 import { createPublicRecipe, deletePublicRecipe, getAllPublicRecipes, updatePublicRecipe } from '../../../services/publicRecipesService'
@@ -75,5 +74,5 @@ export function AdminRecipes() {
     router.push('/?addRecipe=1')
   }
 
-  return <div className="min-h-screen bg-cream text-ink dark:bg-ink-dark dark:text-cream"><main className="mx-auto max-w-[1440px] px-5 pb-20 pt-10 lg:px-10 lg:pt-16"><button onClick={() => router.push('/admin')} className="mb-8 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold transition hover:bg-white dark:border-cream/15 dark:hover:bg-ink-soft">← Volver al panel</button><RecipeGallery mode="admin" recipes={recipes} loading={loading} error={error} onAddRecipe={() => openForm()} onEditRecipe={openForm} onDeleteRecipe={removeRecipe} onAddToMenu={addToMenu} /></main><Footer />{formRecipe && <RecipeFormModal recipe={formRecipe} onClose={closeForm} onSubmit={saveRecipe} loading={formLoading} error={formError} />}</div>
+  return <div className="min-h-screen bg-cream text-ink dark:bg-ink-dark dark:text-cream"><main className="mx-auto max-w-[1440px] px-5 pb-20 pt-10 lg:px-10 lg:pt-16"><RecipeGallery mode="admin" recipes={recipes} loading={loading} error={error} onAddRecipe={() => openForm()} onEditRecipe={openForm} onDeleteRecipe={removeRecipe} onAddToMenu={addToMenu} /></main>{formRecipe && <RecipeFormModal recipe={formRecipe} onClose={closeForm} onSubmit={saveRecipe} loading={formLoading} error={formError} />}</div>
 }

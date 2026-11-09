@@ -14,7 +14,7 @@ function readTheme() {
   }
 }
 
-const protectedPaths = new Set(['/recetas', '/mis-recetas', '/diario', '/perfil'])
+const protectedPaths = new Set(['/', '/recetas', '/mis-recetas', '/diario', '/perfil'])
 
 function isAdminPath(pathname) {
   return pathname === '/admin' || pathname.startsWith('/admin/')

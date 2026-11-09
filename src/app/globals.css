@@ -32,14 +32,14 @@
 }
 @layer components {
   .home-page-background {
-    background-image: linear-gradient(rgba(247, 247, 242, .76), rgba(247, 247, 242, .9)), url('/assets/imgs/home.jpg');
+    background-image: linear-gradient(rgba(247, 247, 242, .4), rgba(247, 247, 242, .8)), url('/assets/imgs/home.jpg');
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
     background-attachment: fixed;
   }
   html.dark .home-page-background {
-    background-image: linear-gradient(rgba(13, 22, 20, .78), rgba(13, 22, 20, .9)), url('/assets/imgs/home.jpg');
+    background-image: linear-gradient(rgba(13, 22, 20, .4), rgba(13, 22, 20, .8)), url('/assets/imgs/home.jpg');
   }
 }
 @layer components {

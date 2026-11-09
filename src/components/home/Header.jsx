@@ -1,16 +1,31 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { BackButton } from '../ui/BackButton'
 import { Leaf, Moon, Sun } from '../ui/icons'
 
+const backLabels = {
+  '/admin': 'Volver al inicio',
+  '/admin/recetas': 'Volver al panel',
+  '/login': 'Volver a bienvenida',
+  '/mis-recetas': 'Volver al perfil',
+  '/registro': 'Volver a bienvenida',
+}
+
+const knownPaths = new Set(['/', '/admin', '/admin/recetas', '/bienvenida', '/diario', '/login', '/mis-recetas', '/perfil', '/recetas', '/registro'])
+
 export function Header({ theme, onThemeToggle, user, isAdmin }) {
+  const pathname = usePathname()
+  const backLabel = backLabels[pathname] || (!knownPaths.has(pathname) ? 'Volver atrás' : '')
+
   return (
     <header className="sticky top-0 z-30 border-b border-ink/10 bg-cream/90 backdrop-blur-sm dark:border-cream/10 dark:bg-ink-dark/85">
-      <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-3 px-4 py-4 sm:px-5 sm:py-5 lg:px-10">
-        <Link className="flex items-center gap-3" href="/">
+      <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-3 px-5 py-4 sm:px-5 sm:py-5 lg:px-10">
+        {backLabel ? <BackButton label={backLabel} /> : <Link className="flex items-center gap-3" href="/">
           <span className="grid h-10 w-10 place-items-center rounded-xl bg-moss text-cream"><Leaf size={21} strokeWidth={2.5} /></span>
           <span className="font-display text-xl font-semibold tracking-tight">sibo<span className="text-coral">.</span>decis</span>
-        </Link>
+        </Link>}
         <nav className="hidden items-center gap-8 text-sm font-medium text-ink/65 dark:text-cream/65 md:flex">
           <Link href="/">Inicio</Link>
           <Link href="/recetas">Recetas generales</Link>

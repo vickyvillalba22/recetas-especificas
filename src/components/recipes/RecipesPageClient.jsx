@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Footer } from "../home/Footer";
 import { RecipeFormModal } from "../home/RecipeFormModal";
 import { RecipeGallery } from "../home/RecipeGallery";
 import {
@@ -142,7 +141,6 @@ export function RecipesPageClient({ mode = "public" }) {
           onAddToMenu={addToMenu}
         />
       </main>
-      <Footer />
       {isPersonal && formRecipe && (
         <RecipeFormModal
           recipe={formRecipe}

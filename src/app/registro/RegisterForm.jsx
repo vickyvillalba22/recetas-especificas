@@ -57,7 +57,6 @@ export function RegisterForm() {
         <button type="button" onClick={handleGoogleRegister} disabled={loading} className="mt-3 w-full rounded-full border border-ink/15 py-3.5 text-sm font-bold text-ink/75 transition hover:bg-cream disabled:cursor-not-allowed disabled:opacity-60 dark:border-cream/15 dark:text-cream/80 dark:hover:bg-ink">Registrarme con Google</button>
         <div className="mt-6 flex flex-col gap-2 text-center text-sm">
           <Link className="font-semibold text-moss dark:text-sage" href="/login">¿Ya tienes cuenta? Inicia sesión</Link>
-          <Link className="text-ink/50 hover:text-ink dark:text-cream/50 dark:hover:text-cream" href="/bienvenida">Volver a bienvenida</Link>
         </div>
       </section>
     </main>

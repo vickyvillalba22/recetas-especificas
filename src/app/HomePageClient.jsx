@@ -163,7 +163,7 @@ function MealModal({ target, days, onClose, onSubmit, error, loading }) {
   const isEditing = Boolean(target.editing)
 
   return (
-    <div onClick={(event) => event.target === event.currentTarget && !loading && onClose()} className="fixed inset-0 z-40 grid place-items-center bg-ink/50 p-4 backdrop-blur-sm">
+    <div onClick={(event) => event.target === event.currentTarget && !loading && onClose()} className="fixed inset-0 z-50 grid place-items-center bg-ink/50 p-4 backdrop-blur-sm">
       <div onClick={(event) => event.stopPropagation()} className="w-full max-w-md rounded-3xl bg-cream p-6 shadow-2xl dark:bg-ink-soft dark:text-cream sm:p-8">
         <div className="mb-6 flex items-start justify-between">
           <div>
