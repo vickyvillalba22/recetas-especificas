@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { DndContext, DragOverlay, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useAuth } from '../context/AuthContext'
 import { Footer } from '../components/home/Footer'
 import { HeroSection } from '../components/home/HeroSection'
 import { ShoppingList } from '../components/home/ShoppingList'
@@ -253,6 +254,7 @@ function DeleteMealModal({ meal, onClose, onConfirm, loading }) {
 export function HomePage() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { user, loading: authLoading } = useAuth()
   const [menu, setMenu] = useState(initialMenu)
   const [weekStart, setWeekStart] = useState(() => getMonday(new Date()))
   const [menuLoading, setMenuLoading] = useState(true)
@@ -335,6 +337,14 @@ export function HomePage() {
 
   useEffect(() => {
     let active = true
+    if (authLoading) return undefined
+    if (!user) {
+      setMenuLoading(false)
+      setMenuError('')
+      setShoppingItems([])
+      return undefined
+    }
+
     setMenuLoading(true)
     if (!mealMoveSaving) setMenuError('')
     const weekId = formatDateKey(weekStart)
@@ -364,7 +374,7 @@ export function HomePage() {
     return () => {
       active = false
     }
-  }, [weekStart])
+  }, [authLoading, user, weekStart])
 
   useEffect(() => {
     if (!CROSS_WEEK_DRAG_ENABLED || menuLoading || !pendingCrossWeek?.dropTarget || !dragOrigin) return

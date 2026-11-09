@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { AuthProvider, useAuth } from '../context/AuthContext'
+import { BottomNavigation } from './home/BottomNavigation'
 import { Header } from './home/Header'
 
 function readTheme() {
@@ -13,7 +14,7 @@ function readTheme() {
   }
 }
 
-const protectedPaths = new Set(['/', '/recetas', '/mis-recetas', '/diario'])
+const protectedPaths = new Set(['/recetas', '/mis-recetas', '/diario', '/perfil'])
 
 function isAdminPath(pathname) {
   return pathname === '/admin' || pathname.startsWith('/admin/')
@@ -22,9 +23,8 @@ function isAdminPath(pathname) {
 function AppShellContent({ children }) {
   const router = useRouter()
   const pathname = usePathname()
-  const { user, loading, isAdmin, logout } = useAuth()
+  const { user, loading, isAdmin } = useAuth()
   const [theme, setTheme] = useState(readTheme)
-  const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
@@ -32,10 +32,6 @@ function AppShellContent({ children }) {
       localStorage.setItem('sibo-theme', theme)
     } catch {}
   }, [theme])
-
-  useEffect(() => {
-    setMobileNavOpen(false)
-  }, [pathname])
 
   useEffect(() => {
     if (!loading && !user && (protectedPaths.has(pathname) || isAdminPath(pathname))) router.replace('/bienvenida')
@@ -59,32 +55,22 @@ function AppShellContent({ children }) {
 
   const toggleTheme = () => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))
 
-  const handleLogout = async () => {
-    try {
-      await logout()
-      router.replace('/bienvenida')
-    } catch (error) {
-      console.error('No se pudo cerrar la sesión:', error)
-    }
-  }
-
   const protectedRoute = protectedPaths.has(pathname) || isAdminPath(pathname)
   const adminUnauthorized = isAdminPath(pathname) && user && !isAdmin
   const shouldShowApp = !protectedRoute || (user && !adminUnauthorized)
+  const isAuthPage = pathname === '/bienvenida' || pathname === '/login' || pathname === '/registro'
+  const showBottomNavigation = Boolean(user && !loading && !isAuthPage && shouldShowApp)
 
   return (
     <>
       <Header
         theme={theme}
-        mobileNavOpen={mobileNavOpen}
         onThemeToggle={toggleTheme}
-        onMobileNavToggle={setMobileNavOpen}
-        onCreateRecipe={() => router.push('/mis-recetas?new=1')}
         user={user}
         isAdmin={isAdmin}
-        onLogout={handleLogout}
       />
       {loading && protectedRoute ? <main className="grid min-h-[calc(100vh-88px)] place-items-center bg-cream text-sm text-ink/60 dark:bg-ink-dark dark:text-cream/60">Cargando sesión...</main> : shouldShowApp ? children : null}
+      {showBottomNavigation && <BottomNavigation />}
     </>
   )
 }
