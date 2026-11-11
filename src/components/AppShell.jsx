@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { AuthProvider, useAuth } from '../context/AuthContext'
 import { BottomNavigation } from './home/BottomNavigation'
 import { Header } from './home/Header'
+import { LoadingScreen } from './ui/LoadingScreen'
 
 function readTheme() {
   try {
@@ -69,7 +70,7 @@ function AppShellContent({ children }) {
         user={user}
         isAdmin={isAdmin}
       />
-      {loading && protectedRoute ? <main className="grid min-h-[calc(100vh-88px)] place-items-center bg-cream text-sm text-ink/60 dark:bg-ink-dark dark:text-cream/60">Cargando sesión...</main> : shouldShowApp ? children : null}
+      {loading && protectedRoute ? <LoadingScreen /> : shouldShowApp ? children : null}
       {showBottomNavigation && <BottomNavigation />}
     </>
   )

@@ -9,14 +9,12 @@ import { HeroSection } from '../components/home/HeroSection'
 import { ShoppingList } from '../components/home/ShoppingList'
 import { WeeklyMenu } from '../components/home/WeeklyMenu'
 import { CROSS_WEEK_DRAG_ENABLED, mealTimes } from '../components/home/weeklyMenuConstants'
-import { Check, CirclePlus, Leaf, X } from '../components/ui/icons'
+import { Check, CirclePlus, Plus, X } from '../components/ui/icons'
 import { getShoppingList, saveShoppingList } from '../services/shoppingListService'
 import { createMeal, deleteMeal, getWeeklyMenu, moveOrSwapMeals, updateMeal } from '../services/weeklyMenuService'
 
 const weekdays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
 const initialMenu = Object.fromEntries(weekdays.map((day) => [day, { Desayuno: null, Almuerzo: null, Merienda: null, Cena: null }]))
-const motivationalPhrases = ['¡Un día a la vez! Cada elección consciente es un paso más hacia sentirte excelente.', 'Cuidar tu panza también es una forma de quererte. ¡Hoy va a ser un gran día!', 'La paciencia es la mejor receta del menú. ¡Vas muy bien!', 'Tu cuerpo se está reacomodando. Dale tiempo, amor y buena comida.']
-
 function getMealIngredients(meal) {
   return Array.isArray(meal?.ingredients) ? meal.ingredients : []
 }
@@ -232,6 +230,67 @@ function ClearListModal({ onClose, onConfirm }) {
   )
 }
 
+function AddShoppingItemsModal({ onClose, onSubmit, loading, error }) {
+  const [rows, setRows] = useState([{ name: '', count: 1 }])
+
+  const updateRow = (index, field, value) => {
+    setRows((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, [field]: value } : row))
+  }
+
+  const addRow = () => setRows((current) => [...current, { name: '', count: 1 }])
+
+  const removeRow = (index) => setRows((current) => current.filter((_, rowIndex) => rowIndex !== index))
+
+  return (
+    <div onClick={(event) => event.target === event.currentTarget && !loading && onClose()} className="fixed inset-0 z-50 grid place-items-center bg-ink/50 p-4 backdrop-blur-sm">
+      <div role="dialog" aria-modal="true" aria-labelledby="add-shopping-items-title" className="w-full max-w-lg rounded-3xl bg-cream p-6 shadow-2xl dark:bg-ink-soft dark:text-cream sm:p-8">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 id="add-shopping-items-title" className="font-display text-2xl">Agregar ingredientes</h2>
+            <p className="mt-2 text-sm leading-relaxed text-ink/60 dark:text-cream/60">Sumá ingredientes extra a tu lista de compras.</p>
+          </div>
+          <button onClick={onClose} disabled={loading} type="button" className="rounded-full p-2 text-ink/50 transition hover:bg-black/5 hover:text-ink disabled:cursor-not-allowed disabled:opacity-40 dark:text-cream/50 dark:hover:bg-cream/10 dark:hover:text-cream" aria-label="Cerrar">
+            <X size={20} />
+          </button>
+        </div>
+        <form onSubmit={onSubmit} className="mt-6">
+          <div className="space-y-3">
+            {rows.map((row, index) => (
+              <div key={index} className="grid grid-cols-[minmax(0,1fr)_76px_36px] items-end gap-2">
+                <label className="text-xs font-bold">
+                  {index === 0 && <span>Ingrediente</span>}
+                  <input name="ingredientName" value={row.name} onChange={(event) => updateRow(index, 'name', event.target.value)} disabled={loading} className="field mt-2" placeholder="Ej. tomate" />
+                </label>
+                <label className="text-xs font-bold">
+                  {index === 0 && <span>Cantidad</span>}
+                  <input name="ingredientCount" type="number" min="1" step="1" value={row.count} onChange={(event) => updateRow(index, 'count', event.target.value)} disabled={loading} className="field mt-2 text-center" />
+                </label>
+                {rows.length > 1 ? (
+                  <button onClick={() => removeRow(index)} disabled={loading} type="button" className="mb-1 grid h-10 w-9 place-items-center rounded-full text-ink/45 transition hover:bg-coral/10 hover:text-coral disabled:cursor-not-allowed disabled:opacity-40 dark:text-cream/45" aria-label={`Quitar ingrediente ${index + 1}`}>
+                    <X size={17} />
+                  </button>
+                ) : <span />}
+              </div>
+            ))}
+          </div>
+          <button onClick={addRow} disabled={loading} type="button" className="mt-4 flex items-center gap-1.5 text-sm font-bold text-moss transition hover:text-ink disabled:cursor-not-allowed disabled:opacity-40 dark:text-sage dark:hover:text-cream">
+            <Plus size={16} /> Agregar otro ingrediente
+          </button>
+          {error && <p className="mt-4 rounded-xl bg-coral/10 p-3 text-sm text-coral">{error}</p>}
+          <div className="mt-6 flex gap-3">
+            <button onClick={onClose} disabled={loading} type="button" className="flex-1 rounded-full border border-ink/15 px-4 py-3 text-sm font-bold text-ink/70 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40 dark:border-cream/15 dark:text-cream/70 dark:hover:bg-ink">
+              Cancelar
+            </button>
+            <button disabled={loading} type="submit" className="flex-1 rounded-full bg-moss px-4 py-3 text-sm font-bold text-white transition hover:bg-ink disabled:cursor-not-allowed disabled:opacity-60">
+              {loading ? 'Agregando...' : 'Agregar a la lista'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 function DeleteMealModal({ meal, onClose, onConfirm, loading }) {
   return (
     <div onClick={(event) => event.target === event.currentTarget && !loading && onClose()} className="fixed inset-0 z-50 grid place-items-center bg-ink/50 p-4 backdrop-blur-sm">
@@ -261,6 +320,9 @@ export function HomePage() {
   const [menuError, setMenuError] = useState('')
   const [shoppingItems, setShoppingItems] = useState([])
   const [showClearListModal, setShowClearListModal] = useState(false)
+  const [showAddShoppingModal, setShowAddShoppingModal] = useState(false)
+  const [shoppingItemSaving, setShoppingItemSaving] = useState(false)
+  const [shoppingModalError, setShoppingModalError] = useState('')
   const [mealTarget, setMealTarget] = useState(null)
   const [mealSaving, setMealSaving] = useState(false)
   const [mealToDelete, setMealToDelete] = useState(null)
@@ -270,14 +332,6 @@ export function HomePage() {
   const [dragOrigin, setDragOrigin] = useState(null)
   const [pendingCrossWeek, setPendingCrossWeek] = useState(null)
   const [mealMoveSaving, setMealMoveSaving] = useState(false)
-  const [showMotivation, setShowMotivation] = useState(() => {
-    try {
-      if (sessionStorage.getItem('sibo-motivation-shown')) return false
-      sessionStorage.setItem('sibo-motivation-shown', '1')
-    } catch {}
-    return true
-  })
-  const [motivationalPhrase] = useState(() => motivationalPhrases[Math.floor(Math.random() * motivationalPhrases.length)])
   const [theme, setTheme] = useState(() => {
     try {
       return localStorage.getItem('sibo-theme') || 'light'
@@ -389,12 +443,6 @@ export function HomePage() {
       localStorage.setItem('sibo-theme', theme)
     } catch {}
   }, [theme])
-
-  useEffect(() => {
-    if (!showMotivation) return undefined
-    const timer = window.setTimeout(() => setShowMotivation(false), 4500)
-    return () => window.clearTimeout(timer)
-  }, [showMotivation])
 
   const persistMeal = async ({ day, meal, name, ingredients }) => {
     const dayIndex = weekdays.indexOf(day)
@@ -649,13 +697,56 @@ export function HomePage() {
     }
   }
 
-  const removeShoppingItem = async (name) => {
-    const nextItems = shoppingItems.filter((item) => item.name !== name)
+  const changeShoppingItemQuantity = async (name, delta) => {
+    const currentItem = shoppingItems.find((item) => item.name === name)
+    if (!currentItem) return
+    const nextCount = (Number(currentItem.count) || 1) + delta
+    const nextItems = nextCount > 0
+      ? shoppingItems.map((item) => item.name === name ? { ...item, count: nextCount } : item)
+      : shoppingItems.filter((item) => item.name !== name)
     setShoppingItems(nextItems)
     try {
       await saveShoppingList({ weekId: formatDateKey(weekStart), items: nextItems })
     } catch (error) {
       setMenuError(error.message)
+    }
+  }
+
+  const openAddShoppingModal = () => {
+    setShoppingModalError('')
+    setShowAddShoppingModal(true)
+  }
+
+  const addManualShoppingItems = async (event) => {
+    event.preventDefault()
+    const form = new FormData(event.currentTarget)
+    const names = form.getAll('ingredientName')
+    const counts = form.getAll('ingredientCount')
+    const additions = names
+      .map((value, index) => ({
+        name: String(value || '').trim(),
+        count: Math.max(1, Number(counts[index]) || 1),
+      }))
+      .filter((item) => item.name)
+
+    if (!additions.length) {
+      setShoppingModalError('Ingresá al menos un ingrediente.')
+      return
+    }
+
+    setShoppingItemSaving(true)
+    setShoppingModalError('')
+    const previousItems = shoppingItems
+    const nextItems = mergeShoppingItems(shoppingItems, additions)
+    setShoppingItems(nextItems)
+    try {
+      await saveShoppingList({ weekId: formatDateKey(weekStart), items: nextItems })
+      setShowAddShoppingModal(false)
+    } catch (error) {
+      setShoppingItems(previousItems)
+      setShoppingModalError(error.message)
+    } finally {
+      setShoppingItemSaving(false)
     }
   }
 
@@ -677,20 +768,6 @@ export function HomePage() {
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd} onDragCancel={handleDragCancel}>
       <div className="min-h-screen bg-cream text-ink dark:bg-ink-dark dark:text-cream">
-        {showMotivation && (
-          <div className="fixed inset-0 z-50 grid place-items-center bg-cream px-6 text-center text-ink dark:bg-ink-dark dark:text-cream">
-            <div className="flex w-full max-w-2xl flex-col items-center">
-              <span className="mb-7 grid h-16 w-16 place-items-center rounded-2xl bg-moss text-cream shadow-soft">
-                <Leaf size={30} />
-              </span>
-              <p className="mb-5 text-xs font-bold uppercase tracking-[.22em] text-coral">
-                sibo<span className="text-ink/30 dark:text-cream/30">.</span>
-                decis
-              </p>
-              <blockquote className="font-display text-3xl leading-tight sm:text-5xl">“{motivationalPhrase}”</blockquote>
-            </div>
-          </div>
-        )}
         <main id="inicio" className="mx-auto max-w-[1440px] px-5 pb-20 pt-10 lg:px-10 lg:pt-16">
           <HeroSection weekStart={weekStart} formatWeekRange={formatWeekRange} onPreviousWeek={() => setWeekStart((current) => addDays(current, -7))} onNextWeek={() => setWeekStart((current) => addDays(current, 7))} disabled={mealMoveSaving} crossWeekDragEnabled={CROSS_WEEK_DRAG_ENABLED} />
           {menuLoading && <p className="mb-4 text-sm text-ink/50 dark:text-cream/50">Cargando tu menú...</p>}
@@ -698,12 +775,13 @@ export function HomePage() {
           {menuError && <p className="mb-4 rounded-xl bg-coral/10 px-4 py-3 text-sm text-coral">No pudimos cargar el menú guardado: {menuError}</p>}
           <div className="grid gap-6 xl:grid-cols-[1fr_310px]">
             <WeeklyMenu menu={menu} weekStart={weekStart} weekdays={weekdays} onAddMeal={setMealTarget} onDeleteMeal={setMealToDelete} formatDayName={formatDayName} formatMonthShort={formatMonthShort} activeDrag={activeDrag} dragDisabled={mealMoveSaving || mealDeleting} />
-              <ShoppingList shoppingItems={shoppingItems} checked={checked} toggleItem={toggleShoppingItem} removeItem={removeShoppingItem} clearList={clearShoppingList} onCopy={copyShoppingList} copied={copied} />
+              <ShoppingList shoppingItems={shoppingItems} checked={checked} toggleItem={toggleShoppingItem} changeQuantity={changeShoppingItemQuantity} clearList={clearShoppingList} onCopy={copyShoppingList} copied={copied} onAddItems={openAddShoppingModal} />
           </div>
          </main>
-         <Footer />
-         {mealTarget && <MealModal target={mealTarget} days={weekdays} onClose={() => setMealTarget(null)} onSubmit={saveManualMeal} error={menuError} loading={mealSaving} />}
-         {showClearListModal && <ClearListModal onClose={() => setShowClearListModal(false)} onConfirm={confirmClearShoppingList} />}
+          <Footer />
+          {mealTarget && <MealModal target={mealTarget} days={weekdays} onClose={() => setMealTarget(null)} onSubmit={saveManualMeal} error={menuError} loading={mealSaving} />}
+          {showAddShoppingModal && <AddShoppingItemsModal onClose={() => setShowAddShoppingModal(false)} onSubmit={addManualShoppingItems} loading={shoppingItemSaving} error={shoppingModalError} />}
+          {showClearListModal && <ClearListModal onClose={() => setShowClearListModal(false)} onConfirm={confirmClearShoppingList} />}
          {mealToDelete && <DeleteMealModal meal={mealToDelete} onClose={() => setMealToDelete(null)} onConfirm={confirmDeleteMeal} loading={mealDeleting} />}
        </div>
       <DragOverlay>{activeDrag ? <div className="rounded-xl bg-moss px-4 py-3 text-sm font-semibold text-white shadow-xl">{activeDrag.name}</div> : null}</DragOverlay>

@@ -1,6 +1,6 @@
-import { Check, Copy, ListChecks, X } from '../ui/icons'
+import { Check, Copy, ListChecks, Plus } from '../ui/icons'
 
-export function ShoppingList({ shoppingItems, checked, toggleItem, removeItem, clearList, onCopy, copied }) {
+export function ShoppingList({ shoppingItems, checked, toggleItem, changeQuantity, clearList, onCopy, copied, onAddItems }) {
   return (
     <aside id="compras" className="rounded-3xl bg-moss p-6 text-cream shadow-soft">
       <div className="mb-8 flex items-start justify-between">
@@ -8,7 +8,9 @@ export function ShoppingList({ shoppingItems, checked, toggleItem, removeItem, c
           <p className="mb-2 text-xs font-bold uppercase tracking-[.18em] text-sun">Esta semana</p>
           <h2 className="font-display text-3xl">Lista de<br />compras</h2>
         </div>
-        <span className="grid h-10 w-10 place-items-center rounded-full bg-white/10"><ListChecks size={19} /></span>
+        <button onClick={onAddItems} type="button" className="grid h-10 w-10 place-items-center rounded-full bg-white/10 transition hover:bg-white/20 hover:text-sun" aria-label="Agregar ingredientes">
+          <Plus size={20} />
+        </button>
       </div>
       <div className="mb-7 flex items-center justify-between border-b border-white/15 pb-5 text-sm">
         <span className="text-cream/60">{checked.length} de {shoppingItems.length} listos</span>
@@ -31,12 +33,18 @@ export function ShoppingList({ shoppingItems, checked, toggleItem, removeItem, c
                   </span>
                   <input className="sr-only" type="checkbox" checked={checked.includes(item.name)} onChange={() => toggleItem(item.name)} />
                   <span className={`truncate ${checked.includes(item.name) ? 'text-cream/40 line-through' : ''}`}>
-                    {item.name} {item.count > 1 && <small className="ml-1 font-bold text-sun">x{item.count}</small>}
+                    {item.name}
                   </span>
                 </label>
-                <button onClick={() => removeItem(item.name)} type="button" className="shrink-0 rounded-full p-1 text-cream/45 transition hover:bg-white/10 hover:text-sun" aria-label={`Eliminar ${item.name}`}>
-                  <X size={15} />
-                </button>
+                <div className="flex shrink-0 items-center rounded-full bg-white/10">
+                  <button onClick={() => changeQuantity(item.name, -1)} type="button" className="grid h-8 w-8 place-items-center rounded-full text-lg text-cream/70 transition hover:bg-white/10 hover:text-sun" aria-label={`Restar una unidad de ${item.name}`}>
+                    −
+                  </button>
+                  <span className="min-w-5 text-center text-xs font-bold text-sun" aria-label={`${item.count} unidades`}>{item.count}</span>
+                  <button onClick={() => changeQuantity(item.name, 1)} type="button" className="grid h-8 w-8 place-items-center rounded-full text-lg text-cream/70 transition hover:bg-white/10 hover:text-sun" aria-label={`Agregar una unidad de ${item.name}`}>
+                    +
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -49,7 +57,7 @@ export function ShoppingList({ shoppingItems, checked, toggleItem, removeItem, c
         </div>
       )}
       <button onClick={onCopy} disabled={!shoppingItems.length} className="mt-8 flex w-full items-center justify-center gap-2 rounded-full bg-sun py-3 text-sm font-bold text-moss transition hover:bg-[#f8d873] disabled:cursor-not-allowed disabled:opacity-40">
-        {copied ? <><Check size={16} /> ¡Copiado!</> : <><Copy size={16} /> Compartir lista</>}
+        {copied ? <><Check size={16} /> ¡Copiado!</> : <><Copy size={16} /> Copiar lista</>}
       </button>
     </aside>
   )

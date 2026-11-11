@@ -18,6 +18,8 @@ const knownPaths = new Set(['/', '/admin', '/admin/recetas', '/bienvenida', '/di
 export function Header({ theme, onThemeToggle, user, isAdmin }) {
   const pathname = usePathname()
   const backLabel = backLabels[pathname] || (!knownPaths.has(pathname) ? 'Volver atrás' : '')
+  const isWelcomePage = pathname === '/bienvenida'
+  const showNavigation = Boolean(user && !isWelcomePage)
 
   return (
     <header className="sticky top-0 z-30 border-b border-ink/10 bg-cream/90 backdrop-blur-sm dark:border-cream/10 dark:bg-ink-dark/85">
@@ -26,14 +28,15 @@ export function Header({ theme, onThemeToggle, user, isAdmin }) {
           <span className="grid h-10 w-10 place-items-center rounded-xl bg-moss text-cream"><Leaf size={21} strokeWidth={2.5} /></span>
           <span className="font-display text-xl font-semibold tracking-tight">sibo<span className="text-coral">.</span>decis</span>
         </Link>}
-        <nav className="hidden items-center gap-8 text-sm font-medium text-ink/65 dark:text-cream/65 md:flex">
-          <Link href="/">Inicio</Link>
-          <Link href="/recetas">Recetas generales</Link>
-          <Link href="/diario">Diario</Link>
-          {user && <Link href="/perfil">Mi perfil</Link>}
-          {isAdmin && <Link href="/admin">Admin</Link>}
-          {!user && <Link href="/login">Ingresar</Link>}
-        </nav>
+        {showNavigation && (
+          <nav className="hidden items-center gap-8 text-sm font-medium text-ink/65 dark:text-cream/65 md:flex">
+            <Link href="/">Inicio</Link>
+            <Link href="/recetas">Recetas generales</Link>
+            <Link href="/diario">Diario</Link>
+            {user && <Link href="/perfil">Mi perfil</Link>}
+            {isAdmin && <Link href="/admin">Admin</Link>}
+          </nav>
+        )}
         <div className="flex items-center gap-2">
           <button onClick={onThemeToggle} className="grid h-10 w-10 place-items-center rounded-full border border-ink/15 text-ink/70 transition hover:bg-white dark:border-cream/15 dark:text-cream/80 dark:hover:bg-ink-soft" aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}>{theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}</button>
         </div>
