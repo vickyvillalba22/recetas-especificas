@@ -1,5 +1,6 @@
 import { BookHeart, X } from "../ui/icons";
 
+// Shared by the personal recipes and admin recipe pages.
 function toFieldValue(value) {
   return Array.isArray(value) ? value.join("\n") : value || "";
 }

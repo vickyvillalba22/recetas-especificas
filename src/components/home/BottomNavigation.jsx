@@ -13,7 +13,7 @@ const navigationItems = [
 
 function isItemActive(pathname, href) {
   if (href === '/') return pathname === '/'
-  if (href === '/perfil') return pathname === '/perfil' || pathname === '/mis-recetas'
+  if (href === '/perfil') return pathname === '/perfil' || pathname === '/mis-recetas' || pathname === '/recetas-favoritas'
   return pathname === href
 }
 

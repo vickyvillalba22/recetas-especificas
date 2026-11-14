@@ -21,6 +21,7 @@ export const PencilEdit = (props) => <HugeIcon icon="pencil-edit-02" {...props} 
 export const Plus = (props) => <HugeIcon icon="add-01" {...props} />
 export const Sparkles = (props) => <HugeIcon icon="sparkles" {...props} />
 export const Settings = (props) => <HugeIcon icon="settings-01" {...props} />
+export const Star = (props) => <HugeIcon icon="star" {...props} />
 export const Sun = (props) => <HugeIcon icon="sun-01" {...props} />
 export const Trash = (props) => <HugeIcon icon="delete-02" {...props} />
 export const UserCircle = (props) => <HugeIcon icon="user-circle-02" {...props} />

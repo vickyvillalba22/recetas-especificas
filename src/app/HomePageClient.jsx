@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { DndContext, DragOverlay, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '../context/AuthContext'
@@ -26,6 +26,7 @@ import {
   formatDayName,
   formatMonthShort,
   formatWeekRange,
+  getDayIndexInWeek,
   getMonday,
   initialMenu,
   menuFromRows,
@@ -49,6 +50,8 @@ export function HomePage() {
   const [dragOrigin, setDragOrigin] = useState(null)
   const [pendingCrossWeek, setPendingCrossWeek] = useState(null)
   const [mealMoveSaving, setMealMoveSaving] = useState(false)
+  const weeklyMenuRef = useRef(null)
+  const [weeklyMenuHeight, setWeeklyMenuHeight] = useState(null)
   const [theme, setTheme] = useState(() => {
     try {
       return localStorage.getItem('sibo-theme') || 'light'
@@ -79,6 +82,26 @@ export function HomePage() {
     closeClearListModal,
   } = useShoppingList({ weekStart, setMenuError })
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }), useSensor(TouchSensor, { activationConstraint: { distance: 8 } }), useSensor(KeyboardSensor))
+
+  useEffect(() => {
+    const element = weeklyMenuRef.current
+    if (!element) return undefined
+
+    const updateHeight = () => {
+      const nextHeight = Math.ceil(element.getBoundingClientRect().height)
+      setWeeklyMenuHeight(nextHeight || null)
+    }
+
+    updateHeight()
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', updateHeight)
+      return () => window.removeEventListener('resize', updateHeight)
+    }
+
+    const observer = new ResizeObserver(updateHeight)
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
 
   const persistCrossWeekMove = async ({ source, dropTarget }) => {
     if (!dragOrigin) return
@@ -120,12 +143,21 @@ export function HomePage() {
       return
     }
     setMealTarget({
-      day: 'Lunes',
+      date: formatDateKey(new Date()),
       meal: 'Cena',
       recipe: recipeToAdd,
     })
     router.replace('/', { scroll: false })
   }, [router, searchParams])
+
+  const openMealModal = (target) => {
+    const targetDayIndex = weekdays.indexOf(target.day)
+    const date = target.date || (targetDayIndex >= 0
+      ? formatDateKey(addDays(weekStart, targetDayIndex))
+      : formatDateKey(new Date()))
+
+    setMealTarget({ ...target, date })
+  }
 
   useEffect(() => {
     let active = true
@@ -182,27 +214,29 @@ export function HomePage() {
     } catch {}
   }, [theme])
 
-  const persistMeal = async ({ day, meal, name, ingredients }) => {
-    const dayIndex = weekdays.indexOf(day)
-    const currentMeal = menu[day]?.[meal]
+  const persistMeal = async ({ day, meal, date, name, ingredients }) => {
+    const currentMeal = mealTarget?.editing ? mealTarget.recipe : null
     const savedMeal = currentMeal?.id
       ? await updateMeal({
           id: currentMeal.id,
-          date: formatDateKey(addDays(weekStart, dayIndex)),
+          date,
           mealType: meal.toLowerCase(),
           recipeName: name,
           ingredients,
         })
       : await createMeal({
-          date: formatDateKey(addDays(weekStart, dayIndex)),
+          date,
           mealType: meal.toLowerCase(),
           recipeName: name,
           ingredients,
         })
-    const nextMenu = {
-      ...menu,
-      [day]: { ...menu[day], [meal]: savedMeal },
+    const nextMenu = { ...menu }
+    const movedFromOriginalSlot = mealTarget?.editing
+      && (mealTarget.day !== day || mealTarget.meal !== meal)
+    if (movedFromOriginalSlot) {
+      nextMenu[mealTarget.day] = { ...nextMenu[mealTarget.day], [mealTarget.meal]: null }
     }
+    nextMenu[day] = { ...nextMenu[day], [meal]: savedMeal }
     setMenu(nextMenu)
     return nextMenu
   }
@@ -210,7 +244,7 @@ export function HomePage() {
   const saveManualMeal = async (event) => {
     event.preventDefault()
     const form = new FormData(event.currentTarget)
-    const day = form.get('day')
+    const date = form.get('date')
     const meal = form.get('meal')
     const name = form.get('name')?.trim()
     const ingredients = form
@@ -218,12 +252,18 @@ export function HomePage() {
       ?.split(',')
       .map((item) => item.trim())
       .filter(Boolean)
-    if (!name) return
-    const previousIngredients = getMealIngredients(menu[day]?.[meal])
+    const dayIndex = getDayIndexInWeek(date, weekStart)
+    const day = weekdays[dayIndex]
+    if (!name || dayIndex < 0) return
+    if (!mealTarget?.editing && menu[day]?.[meal]?.id) {
+      setMenuError('Ese día y momento ya tiene una comida. Elegí otra fecha o momento.')
+      return
+    }
+    const previousIngredients = getMealIngredients(mealTarget?.editing ? mealTarget.recipe : menu[day]?.[meal])
     setMenuError('')
     setMealSaving(true)
     try {
-      await persistMeal({ day, meal, name, ingredients })
+      await persistMeal({ day, meal, date, name, ingredients })
       await replaceMealIngredients(previousIngredients, ingredients || [])
       setMealTarget(null)
     } catch (error) {
@@ -397,13 +437,15 @@ export function HomePage() {
           {menuLoading && <p className="mb-4 text-sm text-ink/50 dark:text-cream/50">Cargando tu menú...</p>}
           {mealMoveSaving && <p className="mb-4 text-sm text-ink/50 dark:text-cream/50">Guardando el movimiento...</p>}
           {menuError && <p className="mb-4 rounded-xl bg-coral/10 px-4 py-3 text-sm text-coral">No pudimos cargar el menú guardado: {menuError}</p>}
-          <div className="grid gap-6 xl:grid-cols-[1fr_310px]">
-            <WeeklyMenu menu={menu} weekStart={weekStart} weekdays={weekdays} onAddMeal={setMealTarget} onDeleteMeal={setMealToDelete} formatDayName={formatDayName} formatMonthShort={formatMonthShort} activeDrag={activeDrag} dragDisabled={mealMoveSaving || mealDeleting} />
-               <ShoppingList shoppingItems={shoppingItems} checked={checked} toggleItem={toggleShoppingItem} changeQuantity={changeShoppingItemQuantity} changeUnit={changeShoppingItemUnit} clearList={clearShoppingList} onCopy={copyShoppingList} copied={copied} onAddItems={openAddShoppingModal} />
+          <div className="grid items-stretch gap-6 xl:grid-cols-[1fr_310px]">
+             <div ref={weeklyMenuRef} className="min-w-0">
+               <WeeklyMenu menu={menu} weekStart={weekStart} weekdays={weekdays} onAddMeal={openMealModal} onDeleteMeal={setMealToDelete} formatDayName={formatDayName} formatMonthShort={formatMonthShort} activeDrag={activeDrag} dragDisabled={mealMoveSaving || mealDeleting} />
+             </div>
+             <ShoppingList height={weeklyMenuHeight} shoppingItems={shoppingItems} checked={checked} toggleItem={toggleShoppingItem} changeQuantity={changeShoppingItemQuantity} changeUnit={changeShoppingItemUnit} clearList={clearShoppingList} onCopy={copyShoppingList} copied={copied} onAddItems={openAddShoppingModal} />
           </div>
          </main>
           <Footer />
-          {mealTarget && <MealModal target={mealTarget} days={weekdays} onClose={() => setMealTarget(null)} onSubmit={saveManualMeal} error={menuError} loading={mealSaving} />}
+          {mealTarget && <MealModal target={mealTarget} minDate={formatDateKey(weekStart)} maxDate={formatDateKey(addDays(weekStart, 6))} onClose={() => setMealTarget(null)} onSubmit={saveManualMeal} error={menuError} loading={mealSaving} />}
            {showAddShoppingModal && <AddShoppingItemsModal onClose={closeAddShoppingModal} onSubmit={addManualShoppingItems} loading={shoppingItemSaving} error={shoppingModalError} />}
            {showClearListModal && <ClearListModal onClose={closeClearListModal} onConfirm={confirmClearShoppingList} />}
          {mealToDelete && <DeleteMealModal meal={mealToDelete} onClose={() => setMealToDelete(null)} onConfirm={confirmDeleteMeal} loading={mealDeleting} />}

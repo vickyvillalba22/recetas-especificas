@@ -22,6 +22,10 @@ export function formatDateKey(date) {
   return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-')
 }
 
+export function getDayIndexInWeek(dateKey, weekStart) {
+  return Array.from({ length: 7 }, (_, index) => formatDateKey(addDays(weekStart, index))).indexOf(dateKey)
+}
+
 export function formatWeekRange(start) {
   const end = addDays(start, 6)
   const startMonth = start.toLocaleDateString('es-ES', { month: 'long' })

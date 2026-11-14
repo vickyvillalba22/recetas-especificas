@@ -1,5 +1,6 @@
 import { BookHeart, Download, PencilEdit, Trash } from "../ui/icons";
 
+// Main journal entry and history section.
 export function JournalSection({
   journalText,
   onJournalTextChange,

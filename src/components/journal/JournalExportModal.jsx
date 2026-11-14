@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { Download, X } from "../ui/icons";
 
+// Journal-specific PDF export dialog.
 export function JournalExportModal({
   fromDate,
   toDate,

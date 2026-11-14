@@ -1,6 +1,6 @@
 import { CirclePlus, X } from '../../ui/icons'
 
-export function MealModal({ target, days, onClose, onSubmit, error, loading }) {
+export function MealModal({ target, minDate, maxDate, onClose, onSubmit, error, loading }) {
   const isEditing = Boolean(target.editing)
 
   return (
@@ -20,10 +20,17 @@ export function MealModal({ target, days, onClose, onSubmit, error, loading }) {
         </div>
         <form onSubmit={onSubmit} className="space-y-5">
           <label className="block text-sm font-bold">
-            Día
-            <select name="day" defaultValue={target.day} disabled={loading} className="field mt-2">
-              {days.map((day) => <option key={day}>{day}</option>)}
-            </select>
+            Fecha
+            <input
+              type="date"
+              name="date"
+              defaultValue={target.date}
+              min={minDate}
+              max={maxDate}
+              required
+              disabled={loading}
+              className="field mt-2"
+            />
           </label>
           <label className="block text-sm font-bold">
             Momento

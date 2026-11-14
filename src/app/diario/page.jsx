@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { JournalExportModal } from "../../components/home/JournalExportModal";
-import { JournalSection } from "../../components/home/JournalSection";
+import { JournalExportModal } from "../../components/journal/JournalExportModal";
+import { JournalSection } from "../../components/journal/JournalSection";
 import { X } from "../../components/ui/icons";
 import {
   createJournalEntry,

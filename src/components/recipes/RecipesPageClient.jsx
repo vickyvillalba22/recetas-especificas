@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { RecipeFormModal } from "../home/RecipeFormModal";
-import { RecipeGallery } from "../home/RecipeGallery";
+import { RecipeFormModal } from "./RecipeFormModal";
+import { RecipeGallery } from "./RecipeGallery";
+import { RemoveFavoriteModal } from "./RemoveFavoriteModal";
 import {
   createPersonalRecipe,
   deletePersonalRecipe,
@@ -11,6 +12,11 @@ import {
   updatePersonalRecipe,
 } from "../../services/personalRecipesService";
 import { getPublicRecipes } from "../../services/publicRecipesService";
+import {
+  deleteFavoriteRecipe,
+  getFavoriteRecipes,
+  saveFavoriteRecipe,
+} from "../../services/favoriteRecipesService";
 
 const personalService = {
   create: createPersonalRecipe,
@@ -25,6 +31,12 @@ export function RecipesPageClient({ mode = "public" }) {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [favoriteRecipeIds, setFavoriteRecipeIds] = useState(() => new Set());
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
+  const [favoriteSavingId, setFavoriteSavingId] = useState(null);
+  const [favoriteToRemove, setFavoriteToRemove] = useState(null);
+  const [favoriteRemoveLoading, setFavoriteRemoveLoading] = useState(false);
+  const [favoriteError, setFavoriteError] = useState("");
   const [formRecipe, setFormRecipe] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState("");
@@ -33,6 +45,7 @@ export function RecipesPageClient({ mode = "public" }) {
     let active = true;
     setLoading(true);
     setError("");
+    setFavoriteError("");
     const loadRecipes = isPersonal ? getPersonalRecipes : getPublicRecipes;
     loadRecipes()
       .then((data) => {
@@ -44,6 +57,24 @@ export function RecipesPageClient({ mode = "public" }) {
       .finally(() => {
         if (active) setLoading(false);
       });
+
+    if (isPersonal) {
+      setFavoriteRecipeIds(new Set());
+      setFavoriteLoading(false);
+    } else {
+      setFavoriteLoading(true);
+      getFavoriteRecipes()
+        .then((favorites) => {
+          if (active) setFavoriteRecipeIds(new Set(favorites.map((recipe) => recipe.id)));
+        })
+        .catch((favoriteLoadError) => {
+          if (active) setFavoriteError(favoriteLoadError.message);
+        })
+        .finally(() => {
+          if (active) setFavoriteLoading(false);
+        });
+    }
+
     return () => {
       active = false;
     };
@@ -122,6 +153,48 @@ export function RecipesPageClient({ mode = "public" }) {
     }
   }
 
+  async function saveFavorite(recipe) {
+    setFavoriteSavingId(recipe.id);
+    setFavoriteError("");
+    try {
+      await saveFavoriteRecipe(recipe);
+      setFavoriteRecipeIds((current) => new Set(current).add(recipe.id));
+    } catch (favoriteSaveError) {
+      setFavoriteError(favoriteSaveError.message);
+    } finally {
+      setFavoriteSavingId(null);
+    }
+  }
+
+  function toggleFavorite(recipe) {
+    if (favoriteRecipeIds.has(recipe.id)) {
+      setFavoriteError("");
+      setFavoriteToRemove(recipe);
+      return;
+    }
+
+    saveFavorite(recipe);
+  }
+
+  async function removeFavorite() {
+    if (!favoriteToRemove) return;
+    setFavoriteRemoveLoading(true);
+    setFavoriteError("");
+    try {
+      await deleteFavoriteRecipe({ id: favoriteToRemove.id });
+      setFavoriteRecipeIds((current) => {
+        const next = new Set(current);
+        next.delete(favoriteToRemove.id);
+        return next;
+      });
+      setFavoriteToRemove(null);
+    } catch (favoriteDeleteError) {
+      setFavoriteError(favoriteDeleteError.message);
+    } finally {
+      setFavoriteRemoveLoading(false);
+    }
+  }
+
   function addToMenu(recipe) {
     sessionStorage.setItem("sibo-recipe-to-add", JSON.stringify(recipe));
     router.push("/?addRecipe=1");
@@ -129,17 +202,22 @@ export function RecipesPageClient({ mode = "public" }) {
 
   return (
     <div className="min-h-screen bg-cream text-ink dark:bg-ink-dark dark:text-cream">
-      <main className="mx-auto max-w-[1440px] px-5 pb-20 pt-10 lg:px-10 lg:pt-16">
+      <main className="mx-auto max-w-[1440px] px-5 pb-20 pt-2 lg:px-10 lg:pt-10">
         <RecipeGallery
           mode={mode}
           recipes={recipes}
           loading={loading}
           error={error}
           onAddRecipe={isPersonal ? () => openForm() : undefined}
-          onEditRecipe={isPersonal ? openForm : undefined}
-          onDeleteRecipe={isPersonal ? removeRecipe : undefined}
-          onAddToMenu={addToMenu}
-        />
+           onEditRecipe={isPersonal ? openForm : undefined}
+           onDeleteRecipe={isPersonal ? removeRecipe : undefined}
+           onAddToMenu={addToMenu}
+           favoriteRecipeIds={favoriteRecipeIds}
+           onToggleFavorite={!isPersonal ? toggleFavorite : undefined}
+           favoriteLoading={favoriteLoading}
+           favoriteSavingId={favoriteSavingId}
+           favoriteError={!isPersonal ? favoriteError : ""}
+         />
       </main>
       {isPersonal && formRecipe && (
         <RecipeFormModal
@@ -148,6 +226,15 @@ export function RecipesPageClient({ mode = "public" }) {
           onSubmit={saveRecipe}
           loading={formLoading}
           error={formError}
+        />
+      )}
+      {favoriteToRemove && (
+        <RemoveFavoriteModal
+          recipe={favoriteToRemove}
+          onClose={() => !favoriteRemoveLoading && setFavoriteToRemove(null)}
+          onConfirm={removeFavorite}
+          loading={favoriteRemoveLoading}
+          error={favoriteError}
         />
       )}
     </div>

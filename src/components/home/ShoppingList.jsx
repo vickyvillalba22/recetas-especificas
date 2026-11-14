@@ -1,13 +1,13 @@
 import { Check, Copy, ListChecks, Plus } from '../ui/icons'
 import { formatShoppingQuantity, getShoppingUnitLabel, shoppingUnits } from '../../utils/shoppingUnits'
 
-export function ShoppingList({ shoppingItems, checked, toggleItem, changeQuantity, changeUnit, clearList, onCopy, copied, onAddItems }) {
+export function ShoppingList({ shoppingItems, checked, toggleItem, changeQuantity, changeUnit, clearList, onCopy, copied, onAddItems, height }) {
   return (
-    <aside id="compras" className="rounded-3xl bg-moss p-6 text-cream shadow-soft">
-      <div className="mb-8 flex items-start justify-between">
+    <aside id="compras" style={height ? { height: `${height}px` } : undefined} className="flex h-full min-h-0 flex-col overflow-hidden rounded-3xl bg-moss p-6 text-cream shadow-soft">
+      <div className="mb-3 flex items-start justify-between">
         <div>
-          <p className="mb-2 text-xs font-bold uppercase tracking-[.18em] text-sun">Esta semana</p>
-          <h2 className="font-display text-3xl">Lista de<br />compras</h2>
+          <p className="mb-2 text-[12px] font-bold uppercase tracking-[.18em] text-sun">Esta semana</p>
+          <h2 className="font-display text-2xl">Lista de compras</h2>
         </div>
         <button onClick={onAddItems} type="button" className="grid h-10 w-10 place-items-center rounded-full bg-white/10 transition hover:bg-white/20 hover:text-sun" aria-label="Agregar ingredientes">
           <Plus size={20} />
@@ -20,7 +20,7 @@ export function ShoppingList({ shoppingItems, checked, toggleItem, changeQuantit
         </div>
       </div>
       {shoppingItems.length ? (
-        <div>
+        <div className="shopping-list-scroll min-h-0 flex-1 overflow-y-auto pr-1">
           <div className="mb-3 flex items-center justify-between gap-3">
             <p className="text-[10px] font-bold uppercase tracking-wider text-cream/45">Ingredientes de la semana</p>
             <button onClick={clearList} type="button" className="text-[10px] font-bold text-cream/55 transition hover:text-sun">Vaciar lista</button>
@@ -38,17 +38,17 @@ export function ShoppingList({ shoppingItems, checked, toggleItem, changeQuantit
                   </span>
                 </label>
                 <div className="flex shrink-0 items-center gap-1 rounded-full bg-white/10 pl-1">
-                  <button onClick={() => changeQuantity(item, -1)} type="button" className="grid h-8 w-7 place-items-center rounded-full text-lg text-cream/70 transition hover:bg-white/10 hover:text-sun" aria-label={`Restar cantidad de ${item.name}`}>
+                  <button onClick={() => changeQuantity(item, -1)} type="button" className="grid h-8 w-5 place-items-center rounded-full text-lg text-cream/70 transition hover:bg-white/10 hover:text-sun" aria-label={`Restar cantidad de ${item.name}`}>
                     −
                   </button>
-                  <span className="min-w-8 text-center text-xs font-bold text-sun" aria-label={`${item.quantity} ${getShoppingUnitLabel(item.unit, item.quantity)}`}>{formatShoppingQuantity(item.quantity)}</span>
-                  <button onClick={() => changeQuantity(item, 1)} type="button" className="grid h-8 w-7 place-items-center rounded-full text-lg text-cream/70 transition hover:bg-white/10 hover:text-sun" aria-label={`Agregar cantidad de ${item.name}`}>
+                  <span className="min-w-5 text-center text-xs font-bold text-sun" aria-label={`${item.quantity} ${getShoppingUnitLabel(item.unit, item.quantity)}`}>{formatShoppingQuantity(item.quantity)}</span>
+                  <button onClick={() => changeQuantity(item, 1)} type="button" className="grid h-8 w-4 place-items-center rounded-full text-lg text-cream/70 transition hover:bg-white/10 hover:text-sun" aria-label={`Agregar cantidad de ${item.name}`}>
                     +
                   </button>
                   <select
                     value={item.unit}
                     onChange={(event) => changeUnit(item, event.target.value)}
-                    className="h-8 max-w-20 rounded-full border-0 bg-transparent px-1 text-[10px] font-bold text-cream outline-none"
+                    className="h-8 max-w-16 rounded-full border-0 bg-transparent px-2 text-[10px] text-right font-bold text-cream outline-none mr-2"
                     aria-label={`Unidad de ${item.name}`}
                   >
                     {shoppingUnits.map((option) => <option key={option.value} value={option.value} className="bg-moss text-cream">{option.label}</option>)}
@@ -59,7 +59,7 @@ export function ShoppingList({ shoppingItems, checked, toggleItem, changeQuantit
           </div>
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed border-white/20 px-4 py-8 text-center">
+        <div className="flex min-h-0 flex-1 items-center justify-center rounded-2xl border border-dashed border-white/20 px-4 py-8 text-center">
           <ListChecks className="mx-auto mb-3 text-cream/40" size={24} />
           <p className="text-sm font-semibold">Tu lista está vacía</p>
           <p className="mt-1 text-xs leading-relaxed text-cream/50">Agrega ingredientes al menú para verlos aquí.</p>

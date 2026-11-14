@@ -10,10 +10,11 @@ const backLabels = {
   '/admin/recetas': 'Volver al panel',
   '/login': 'Volver al inicio',
   '/mis-recetas': 'Volver al perfil',
+  '/recetas-favoritas': 'Volver al perfil',
   '/registro': 'Volver al inicio',
 }
 
-const knownPaths = new Set(['/', '/admin', '/admin/recetas', '/diario', '/login', '/mis-recetas', '/perfil', '/recetas', '/registro'])
+const knownPaths = new Set(['/', '/admin', '/admin/recetas', '/diario', '/login', '/mis-recetas', '/perfil', '/recetas', '/recetas-favoritas', '/registro'])
 
 export function Header({ theme, onThemeToggle, user, isAdmin }) {
   const pathname = usePathname()

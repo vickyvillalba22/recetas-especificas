@@ -55,12 +55,21 @@ export function parseMenuIngredient(ingredient) {
 
   const value = String(ingredient || '').trim()
   const match = value.match(new RegExp(`^(\\s*)(\\d+(?:[.,]\\d+)?)\\s*(${ingredientUnitPattern})\\s+(?:de\\s+)?(.+?)\\s*$`, 'i'))
-  if (!match) return { name: value, quantity: 1, unit: 'unidad' }
+  if (match) {
+    return {
+      name: match[4].trim(),
+      quantity: Math.max(0.01, Number(match[2].replace(',', '.')) || 1),
+      unit: ingredientUnitAliases[match[3].toLocaleLowerCase()] || 'unidad',
+    }
+  }
+
+  const quantityOnlyMatch = value.match(/^\s*(\d+(?:[.,]\d+)?)\s+(?:de\s+)?(.+?)\s*$/i)
+  if (!quantityOnlyMatch) return { name: value, quantity: 1, unit: 'unidad' }
 
   return {
-    name: match[4].trim(),
-    quantity: Math.max(0.01, Number(match[2].replace(',', '.')) || 1),
-    unit: ingredientUnitAliases[match[3].toLocaleLowerCase()] || 'unidad',
+    name: quantityOnlyMatch[2].trim(),
+    quantity: Math.max(0.01, Number(quantityOnlyMatch[1].replace(',', '.')) || 1),
+    unit: 'unidad',
   }
 }
 

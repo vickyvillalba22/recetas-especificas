@@ -44,11 +44,10 @@ export function HeroSection({
           <span className="h-2 w-2 shrink-0 rounded-full bg-coral" /> Semana del{" "}
           {formatWeekRange(weekStart)}
         </p>
-        <h1 className="max-w-2xl font-display text-[clamp(3.25rem,13vw,4.5rem)] leading-[.92] tracking-tight">
-          Comer bien,
-          <br />
-          <em className="font-normal text-moss dark:text-sage">
-            sentirte mejor.
+        <h1 className="max-w-4xl font-display text-[clamp(3.25rem,13vw,4.5rem)] leading-[.92] tracking-tight">
+          Comer bien, 
+          <em className="font-normal text-moss dark:text-sage pl-3">
+          sentirte mejor.
           </em>
         </h1>
         <p className="mt-5 max-w-md text-sm leading-relaxed text-ink/60 dark:text-cream/60 sm:mt-6 sm:text-base">

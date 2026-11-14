@@ -74,4 +74,24 @@
   .dark .field {
     @apply border-cream/10 bg-ink-soft text-cream placeholder:text-cream/30;
   }
+  .shopping-list-scroll {
+    scrollbar-color: rgba(244, 201, 93, .85) rgba(255, 255, 255, .12);
+    scrollbar-width: thin;
+    scrollbar-gutter: stable;
+  }
+  .shopping-list-scroll::-webkit-scrollbar {
+    width: 8px;
+  }
+  .shopping-list-scroll::-webkit-scrollbar-track {
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, .12);
+  }
+  .shopping-list-scroll::-webkit-scrollbar-thumb {
+    border: 2px solid #335c48;
+    border-radius: 9999px;
+    background: #f4c95d;
+  }
+  .shopping-list-scroll::-webkit-scrollbar-thumb:hover {
+    background: #f8d873;
+  }
 }
