@@ -1,6 +1,9 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import { useAuth } from '../context/AuthContext'
+import { WelcomePage } from '../components/auth/WelcomePage'
+import { LoadingScreen } from '../components/ui/LoadingScreen'
 
 const HomePage = dynamic(() => import('./HomePageClient').then((module) => module.HomePage), {
   ssr: false,
@@ -8,5 +11,8 @@ const HomePage = dynamic(() => import('./HomePageClient').then((module) => modul
 })
 
 export default function Page() {
-  return <HomePage />
+  const { user, loading } = useAuth()
+
+  if (loading) return <LoadingScreen />
+  return user ? <HomePage /> : <WelcomePage />
 }

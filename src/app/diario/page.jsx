@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { JournalExportModal } from "../../components/home/JournalExportModal";
 import { JournalSection } from "../../components/home/JournalSection";
 import { X } from "../../components/ui/icons";
 import {
@@ -9,6 +10,11 @@ import {
   getJournalEntries,
   updateJournalEntry,
 } from "../../services/journalService";
+import {
+  downloadJournalEntriesPdf,
+  filterJournalEntriesByDateRange,
+  getJournalDateBounds,
+} from "../../services/journalPdfService";
 
 export default function JournalPage() {
   const [journalText, setJournalText] = useState("");
@@ -20,6 +26,11 @@ export default function JournalPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [exportFromDate, setExportFromDate] = useState("");
+  const [exportToDate, setExportToDate] = useState("");
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState("");
 
   useEffect(() => {
     getJournalEntries()
@@ -94,6 +105,59 @@ export default function JournalPage() {
     setDeleting(false);
   };
 
+  const openExportModal = () => {
+    const { fromDate, toDate } = getJournalDateBounds(journalEntries);
+    setExportFromDate(fromDate);
+    setExportToDate(toDate);
+    setExportError("");
+    setExportModalOpen(true);
+  };
+
+  const closeExportModal = () => {
+    if (exporting) return;
+    setExportModalOpen(false);
+    setExportError("");
+  };
+
+  const exportJournal = async (event) => {
+    event.preventDefault();
+    if (!exportFromDate || !exportToDate) {
+      setExportError("Seleccioná las dos fechas para descargar el diario.");
+      return;
+    }
+    if (exportFromDate > exportToDate) {
+      setExportError("La fecha inicial no puede ser posterior a la fecha final.");
+      return;
+    }
+
+    const entriesToExport = filterJournalEntriesByDateRange(
+      journalEntries,
+      exportFromDate,
+      exportToDate,
+    );
+    if (!entriesToExport.length) {
+      setExportError("No hay entradas en el período seleccionado.");
+      return;
+    }
+
+    setExporting(true);
+    setExportError("");
+    try {
+      await downloadJournalEntriesPdf(
+        entriesToExport,
+        exportFromDate,
+        exportToDate,
+      );
+      setExportModalOpen(false);
+    } catch (exportGenerationError) {
+      setExportError(
+        exportGenerationError.message || "No se pudo generar el PDF.",
+      );
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-cream text-ink dark:bg-ink-dark dark:text-cream">
       <main className="mx-auto max-w-[1440px] px-5 pb-20 pt-10 lg:px-10 lg:pt-16">
@@ -109,6 +173,8 @@ export default function JournalPage() {
           saving={saving}
           error={error}
           journalEntries={journalEntries}
+          onDownload={openExportModal}
+          downloadDisabled={loading || !journalEntries.some((entry) => entry.createdAt)}
         />
       </main>
       {entryToDelete && (
@@ -117,6 +183,29 @@ export default function JournalPage() {
           onConfirm={removeJournalEntry}
           loading={deleting}
           error={deleteError}
+        />
+      )}
+      {exportModalOpen && (
+        <JournalExportModal
+          fromDate={exportFromDate}
+          toDate={exportToDate}
+          onFromDateChange={(event) => {
+            setExportFromDate(event.target.value);
+            setExportError("");
+          }}
+          onToDateChange={(event) => {
+            setExportToDate(event.target.value);
+            setExportError("");
+          }}
+          onClose={closeExportModal}
+          onSubmit={exportJournal}
+          entryCount={filterJournalEntriesByDateRange(
+            journalEntries,
+            exportFromDate,
+            exportToDate,
+          ).length}
+          loading={exporting}
+          error={exportError}
         />
       )}
     </div>

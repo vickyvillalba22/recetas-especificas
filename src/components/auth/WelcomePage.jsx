@@ -1,10 +1,8 @@
+'use client'
+
 import Link from 'next/link'
 
-export const metadata = {
-  title: 'Bienvenida',
-}
-
-export default function WelcomePage() {
+export function WelcomePage() {
   return (
     <main className="home-page-background grid min-h-[calc(100vh-88px)] place-items-center bg-cream px-5 py-16 text-ink dark:bg-ink-dark dark:text-cream">
       <section className="w-full max-w-xl rounded-3xl border border-ink/10 bg-white p-8 text-center shadow-soft dark:border-cream/10 dark:bg-ink-soft dark:shadow-soft-dark sm:p-12">

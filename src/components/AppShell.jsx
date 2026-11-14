@@ -15,7 +15,7 @@ function readTheme() {
   }
 }
 
-const protectedPaths = new Set(['/', '/recetas', '/mis-recetas', '/diario', '/perfil'])
+const protectedPaths = new Set(['/recetas', '/mis-recetas', '/diario', '/perfil'])
 
 function isAdminPath(pathname) {
   return pathname === '/admin' || pathname.startsWith('/admin/')
@@ -35,7 +35,7 @@ function AppShellContent({ children }) {
   }, [theme])
 
   useEffect(() => {
-    if (!loading && !user && (protectedPaths.has(pathname) || isAdminPath(pathname))) router.replace('/bienvenida')
+    if (!loading && !user && (protectedPaths.has(pathname) || isAdminPath(pathname))) router.replace('/')
     if (!loading && user && isAdminPath(pathname) && !isAdmin) router.replace('/')
   }, [isAdmin, loading, pathname, router, user])
 
@@ -59,7 +59,7 @@ function AppShellContent({ children }) {
   const protectedRoute = protectedPaths.has(pathname) || isAdminPath(pathname)
   const adminUnauthorized = isAdminPath(pathname) && user && !isAdmin
   const shouldShowApp = !protectedRoute || (user && !adminUnauthorized)
-  const isAuthPage = pathname === '/bienvenida' || pathname === '/login' || pathname === '/registro'
+  const isAuthPage = pathname === '/login' || pathname === '/registro'
   const showBottomNavigation = Boolean(user && !loading && !isAuthPage && shouldShowApp)
 
   return (

@@ -9,7 +9,8 @@ function normalizeItems(items) {
         .filter((item) => item?.name)
         .map((item) => ({
           name: String(item.name),
-          count: Number(item.count) || 1,
+          quantity: Math.max(0.01, Number(item.quantity ?? item.count) || 1),
+          unit: String(item.unit || 'unidad'),
           checked: Boolean(item.checked),
         }))
     : []

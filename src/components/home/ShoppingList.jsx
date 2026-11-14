@@ -1,6 +1,7 @@
 import { Check, Copy, ListChecks, Plus } from '../ui/icons'
+import { formatShoppingQuantity, getShoppingUnitLabel, shoppingUnits } from '../../utils/shoppingUnits'
 
-export function ShoppingList({ shoppingItems, checked, toggleItem, changeQuantity, clearList, onCopy, copied, onAddItems }) {
+export function ShoppingList({ shoppingItems, checked, toggleItem, changeQuantity, changeUnit, clearList, onCopy, copied, onAddItems }) {
   return (
     <aside id="compras" className="rounded-3xl bg-moss p-6 text-cream shadow-soft">
       <div className="mb-8 flex items-start justify-between">
@@ -26,24 +27,32 @@ export function ShoppingList({ shoppingItems, checked, toggleItem, changeQuantit
           </div>
           <div className="space-y-3">
             {shoppingItems.map((item) => (
-              <div key={item.name} className="flex items-center gap-2 text-sm">
+              <div key={`${item.name}-${item.unit}`} className="flex items-center gap-2 text-sm">
                 <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-3">
-                  <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-md border transition ${checked.includes(item.name) ? 'border-sun bg-sun text-moss' : 'border-white/25'}`}>
-                    {checked.includes(item.name) && <Check size={13} strokeWidth={3} />}
+                  <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-md border transition ${checked.includes(`${item.name.trim().toLocaleLowerCase()}::${item.unit}`) ? 'border-sun bg-sun text-moss' : 'border-white/25'}`}>
+                    {checked.includes(`${item.name.trim().toLocaleLowerCase()}::${item.unit}`) && <Check size={13} strokeWidth={3} />}
                   </span>
-                  <input className="sr-only" type="checkbox" checked={checked.includes(item.name)} onChange={() => toggleItem(item.name)} />
-                  <span className={`truncate ${checked.includes(item.name) ? 'text-cream/40 line-through' : ''}`}>
+                  <input className="sr-only" type="checkbox" checked={checked.includes(`${item.name.trim().toLocaleLowerCase()}::${item.unit}`)} onChange={() => toggleItem(item)} />
+                  <span className={`truncate ${checked.includes(`${item.name.trim().toLocaleLowerCase()}::${item.unit}`) ? 'text-cream/40 line-through' : ''}`}>
                     {item.name}
                   </span>
                 </label>
-                <div className="flex shrink-0 items-center rounded-full bg-white/10">
-                  <button onClick={() => changeQuantity(item.name, -1)} type="button" className="grid h-8 w-8 place-items-center rounded-full text-lg text-cream/70 transition hover:bg-white/10 hover:text-sun" aria-label={`Restar una unidad de ${item.name}`}>
+                <div className="flex shrink-0 items-center gap-1 rounded-full bg-white/10 pl-1">
+                  <button onClick={() => changeQuantity(item, -1)} type="button" className="grid h-8 w-7 place-items-center rounded-full text-lg text-cream/70 transition hover:bg-white/10 hover:text-sun" aria-label={`Restar cantidad de ${item.name}`}>
                     −
                   </button>
-                  <span className="min-w-5 text-center text-xs font-bold text-sun" aria-label={`${item.count} unidades`}>{item.count}</span>
-                  <button onClick={() => changeQuantity(item.name, 1)} type="button" className="grid h-8 w-8 place-items-center rounded-full text-lg text-cream/70 transition hover:bg-white/10 hover:text-sun" aria-label={`Agregar una unidad de ${item.name}`}>
+                  <span className="min-w-8 text-center text-xs font-bold text-sun" aria-label={`${item.quantity} ${getShoppingUnitLabel(item.unit, item.quantity)}`}>{formatShoppingQuantity(item.quantity)}</span>
+                  <button onClick={() => changeQuantity(item, 1)} type="button" className="grid h-8 w-7 place-items-center rounded-full text-lg text-cream/70 transition hover:bg-white/10 hover:text-sun" aria-label={`Agregar cantidad de ${item.name}`}>
                     +
                   </button>
+                  <select
+                    value={item.unit}
+                    onChange={(event) => changeUnit(item, event.target.value)}
+                    className="h-8 max-w-20 rounded-full border-0 bg-transparent px-1 text-[10px] font-bold text-cream outline-none"
+                    aria-label={`Unidad de ${item.name}`}
+                  >
+                    {shoppingUnits.map((option) => <option key={option.value} value={option.value} className="bg-moss text-cream">{option.label}</option>)}
+                  </select>
                 </div>
               </div>
             ))}

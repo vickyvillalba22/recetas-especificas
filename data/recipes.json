@@ -1,0 +1,202 @@
+[
+  {
+    "id": "sibo-test-01",
+    "name": "Omelette de espinaca y tomate",
+    "description": "Omelette liviano para un desayuno o una cena rápida.",
+    "ingredients": ["2 huevos", "1 taza de espinaca fresca", "1 tomate pequeño", "1 cucharadita de aceite de oliva", "Sal y pimienta"],
+    "steps": ["Batir los huevos con sal y pimienta.", "Saltear la espinaca y el tomate en el aceite.", "Agregar los huevos y cocinar hasta que estén firmes.", "Doblar el omelette y servir caliente."],
+    "time": "15 minutos",
+    "tags": ["desayuno", "rápida", "bajo en FODMAP"],
+    "published": true
+  },
+  {
+    "id": "sibo-test-02",
+    "name": "Pollo con arroz y zucchini",
+    "description": "Plato completo con proteína magra y vegetales suaves.",
+    "ingredients": ["150 g de pechuga de pollo", "1 taza de arroz blanco cocido", "1 zucchini pequeño", "1 cucharada de aceite de oliva", "Jugo de limón", "Sal y pimienta"],
+    "steps": ["Cortar el pollo y el zucchini en trozos.", "Cocinar el pollo con aceite, sal y pimienta.", "Agregar el zucchini y cocinar hasta que esté tierno.", "Servir con el arroz y unas gotas de limón."],
+    "time": "30 minutos",
+    "tags": ["almuerzo", "pollo", "bajo en FODMAP"],
+    "published": true
+  },
+  {
+    "id": "sibo-test-03",
+    "name": "Salmón al horno con papa y zanahoria",
+    "description": "Salmón al horno acompañado de vegetales asados.",
+    "ingredients": ["1 filete de salmón", "1 papa mediana", "1 zanahoria", "1 cucharada de aceite de oliva", "Jugo de limón", "Eneldo, sal y pimienta"],
+    "steps": ["Cortar la papa y la zanahoria en cubos.", "Hornear los vegetales con aceite durante 20 minutos.", "Agregar el salmón condimentado con limón y eneldo.", "Hornear 12 a 15 minutos más y servir."],
+    "time": "40 minutos",
+    "tags": ["cena", "pescado", "horno"],
+    "published": true
+  },
+  {
+    "id": "sibo-test-04",
+    "name": "Ensalada de pavo y quinoa",
+    "description": "Ensalada fresca y saciante para un almuerzo ligero.",
+    "ingredients": ["120 g de pechuga de pavo cocida", "1 taza de quinoa cocida", "Hojas de lechuga", "1 pepino pequeño", "1 zanahoria pequeña", "Aceite de oliva y jugo de limón"],
+    "steps": ["Cortar el pavo, el pepino y la zanahoria.", "Colocar la lechuga en un bol.", "Agregar la quinoa y el resto de los ingredientes.", "Condimentar con aceite de oliva y limón."],
+    "time": "20 minutos",
+    "tags": ["ensalada", "almuerzo", "sin gluten"],
+    "published": true
+  },
+  {
+    "id": "sibo-test-05",
+    "name": "Arroz salteado con camarones",
+    "description": "Arroz salteado con camarones, jengibre y vegetales.",
+    "ingredients": ["150 g de camarones limpios", "1 taza de arroz blanco cocido", "1 zanahoria pequeña", "1 taza de bok choy", "1 cucharadita de jengibre rallado", "1 cucharada de salsa tamari sin gluten"],
+    "steps": ["Saltear los camarones con el jengibre.", "Agregar la zanahoria y el bok choy.", "Incorporar el arroz cocido.", "Condimentar con tamari y cocinar unos minutos."],
+    "time": "25 minutos",
+    "tags": ["mariscos", "rápida", "sin gluten"],
+    "published": true
+  },
+  {
+    "id": "sibo-test-06",
+    "name": "Carne a la plancha con puré de papa",
+    "description": "Carne magra acompañada de un puré preparado con aceite de oliva.",
+    "ingredients": ["150 g de carne magra", "2 papas medianas", "1 cucharada de aceite de oliva", "1 cucharadita de mostaza", "Sal y pimienta"],
+    "steps": ["Hervir las papas hasta que estén tiernas.", "Pisar las papas con aceite de oliva, sal y pimienta.", "Condimentar la carne con mostaza, sal y pimienta.", "Cocinar la carne a la plancha y servir con el puré."],
+    "time": "35 minutos",
+    "tags": ["carne", "cena", "sin lácteos"],
+    "published": true
+  },
+  {
+    "id": "sibo-test-07",
+    "name": "Merluza con polenta y espinaca",
+    "description": "Filete de merluza con polenta cremosa y espinaca salteada.",
+    "ingredients": ["1 filete de merluza", "1/2 taza de polenta instantánea", "1 taza de espinaca fresca", "1 cucharada de aceite de oliva", "Jugo de limón", "Sal y pimienta"],
+    "steps": ["Cocinar la polenta según las indicaciones del envase.", "Cocinar la merluza a la plancha con sal, pimienta y limón.", "Saltear la espinaca con aceite de oliva.", "Servir la merluza junto con la polenta y la espinaca."],
+    "time": "25 minutos",
+    "tags": ["pescado", "cena", "sin gluten"],
+    "published": true
+  },
+  {
+    "id": "sibo-test-08",
+    "name": "Sopa de pollo, zanahoria y calabaza",
+    "description": "Sopa reconfortante sin cebolla ni ajo.",
+    "ingredients": ["150 g de pechuga de pollo", "1 zanahoria", "1 taza de calabaza", "1 tallo de la parte verde de cebolla de verdeo", "750 ml de caldo sin ajo ni cebolla", "Sal y pimienta"],
+    "steps": ["Cortar el pollo, la zanahoria y la calabaza.", "Calentar el caldo y agregar los vegetales.", "Incorporar el pollo y cocinar hasta que esté completamente cocido.", "Terminar con la parte verde de la cebolla de verdeo."],
+    "time": "35 minutos",
+    "tags": ["sopa", "pollo", "sin lácteos"],
+    "published": true
+  },
+  {
+    "id": "sibo-test-09",
+    "name": "Fideos de arroz con pollo y bok choy",
+    "description": "Fideos de arroz salteados con pollo y vegetales crocantes.",
+    "ingredients": ["100 g de fideos de arroz", "120 g de pechuga de pollo", "1 taza de bok choy", "1 zanahoria pequeña", "1 cucharada de salsa tamari sin gluten", "1 cucharadita de jengibre rallado"],
+    "steps": ["Hidratar los fideos de arroz según el paquete.", "Saltear el pollo con el jengibre.", "Agregar la zanahoria y el bok choy.", "Incorporar los fideos y el tamari, y mezclar."],
+    "time": "25 minutos",
+    "tags": ["pollo", "fideos", "rápida"],
+    "published": true
+  },
+  {
+    "id": "sibo-test-10",
+    "name": "Ensalada de atún y papa",
+    "description": "Ensalada fresca de atún con papa, pepino y hojas verdes.",
+    "ingredients": ["1 lata de atún al natural", "1 papa mediana", "Hojas de lechuga", "1/2 pepino", "1 tomate pequeño", "Aceite de oliva y jugo de limón"],
+    "steps": ["Hervir la papa y cortarla en cubos.", "Lavar y cortar las verduras.", "Mezclar la papa, el atún y las verduras.", "Condimentar con aceite de oliva y limón."],
+    "time": "25 minutos",
+    "tags": ["ensalada", "atún", "sin lácteos"],
+    "published": true
+  },
+  {
+    "id": "sibo-test-11",
+    "name": "Hamburguesa de pavo al plato",
+    "description": "Hamburguesa casera de pavo servida con ensalada simple.",
+    "ingredients": ["150 g de carne picada de pavo", "1 huevo pequeño", "1 cucharada de avena molida", "Hojas de lechuga", "1 tomate pequeño", "Sal, pimienta y pimentón dulce"],
+    "steps": ["Mezclar el pavo con el huevo, la avena y los condimentos.", "Formar una hamburguesa.", "Cocinar a la plancha hasta que esté completamente cocida.", "Servir con lechuga y tomate."],
+    "time": "25 minutos",
+    "tags": ["pavo", "rápida", "almuerzo"],
+    "published": true
+  },
+  {
+    "id": "sibo-test-12",
+    "name": "Berenjena rellena de quinoa y pavo",
+    "description": "Berenjena al horno rellena con quinoa y carne magra.",
+    "ingredients": ["1 berenjena mediana", "100 g de carne picada de pavo", "1/2 taza de quinoa cocida", "1 tomate pequeño", "1 cucharadita de aceite de oliva", "Sal, pimienta y orégano"],
+    "steps": ["Cortar la berenjena por la mitad y retirar parte de la pulpa.", "Cocinar el pavo con la pulpa de berenjena y el tomate.", "Mezclar con la quinoa y condimentar.", "Rellenar la berenjena y hornear durante 20 minutos."],
+    "time": "45 minutos",
+    "tags": ["horno", "pavo", "sin gluten"],
+    "published": true
+  },
+  {
+    "id": "sibo-test-13",
+    "name": "Pollo al limón con zanahoria y chauchas",
+    "description": "Pollo dorado acompañado de vegetales al vapor.",
+    "ingredients": ["150 g de pechuga de pollo", "1 zanahoria", "1 taza de chauchas", "Jugo de 1/2 limón", "1 cucharada de aceite de oliva", "Sal, pimienta y tomillo"],
+    "steps": ["Condimentar el pollo con limón, sal, pimienta y tomillo.", "Cocinarlo en una sartén con aceite de oliva.", "Cocinar la zanahoria y las chauchas al vapor.", "Servir el pollo junto con los vegetales."],
+    "time": "30 minutos",
+    "tags": ["pollo", "sin gluten", "sin lácteos"],
+    "published": true
+  },
+  {
+    "id": "sibo-test-14",
+    "name": "Quinoa con salmón y espinaca",
+    "description": "Bowl tibio de quinoa, salmón y espinaca fresca.",
+    "ingredients": ["120 g de salmón cocido", "1 taza de quinoa cocida", "1 taza de espinaca fresca", "1/2 pepino", "Jugo de limón", "Aceite de oliva, sal y pimienta"],
+    "steps": ["Calentar la quinoa cocida.", "Agregar la espinaca para que se ablande ligeramente.", "Incorporar el salmón desmenuzado y el pepino.", "Condimentar con limón, aceite, sal y pimienta."],
+    "time": "20 minutos",
+    "tags": ["salmón", "bowl", "sin gluten"],
+    "published": true
+  },
+  {
+    "id": "sibo-test-15",
+    "name": "Frittata de papa y zucchini",
+    "description": "Frittata sencilla para aprovechar vegetales y huevos.",
+    "ingredients": ["3 huevos", "1 papa pequeña", "1/2 zucchini", "1 cucharada de aceite de oliva", "1 cucharada de ciboulette picado", "Sal y pimienta"],
+    "steps": ["Cocinar la papa en cubos hasta que esté tierna.", "Saltear el zucchini con el aceite.", "Batir los huevos con ciboulette, sal y pimienta.", "Mezclar todo y cocinar a fuego bajo hasta que cuaje."],
+    "time": "30 minutos",
+    "tags": ["huevos", "vegetariana", "cena"],
+    "published": true
+  },
+  {
+    "id": "sibo-test-16",
+    "name": "Arroz con carne y morrón rojo",
+    "description": "Arroz sabroso con carne magra y morrón rojo.",
+    "ingredients": ["120 g de carne magra en tiras", "1 taza de arroz blanco cocido", "1/2 morrón rojo", "1 zanahoria pequeña", "1 cucharada de aceite de oliva", "Pimentón dulce, sal y pimienta"],
+    "steps": ["Cortar el morrón y la zanahoria en tiras.", "Dorar la carne con aceite y pimentón.", "Agregar los vegetales y cocinar hasta que estén tiernos.", "Incorporar el arroz y mezclar antes de servir."],
+    "time": "30 minutos",
+    "tags": ["carne", "arroz", "almuerzo"],
+    "published": true
+  },
+  {
+    "id": "sibo-test-17",
+    "name": "Tacos de camarones en tortilla de maíz",
+    "description": "Tacos frescos con camarones y vegetales crocantes.",
+    "ingredients": ["150 g de camarones limpios", "3 tortillas de maíz", "1/4 de palta", "1/2 taza de repollo morado", "Jugo de limón", "Pimentón dulce, sal y pimienta"],
+    "steps": ["Condimentar los camarones con limón, pimentón, sal y pimienta.", "Cocinarlos en una sartén hasta que estén rosados.", "Calentar las tortillas de maíz.", "Rellenar con camarones, repollo y palta."],
+    "time": "20 minutos",
+    "tags": ["camarones", "rápida", "sin gluten"],
+    "published": true
+  },
+  {
+    "id": "sibo-test-18",
+    "name": "Avena con arándanos y chía",
+    "description": "Desayuno preparado con avena, leche sin lactosa y fruta en porción moderada.",
+    "ingredients": ["1/2 taza de avena arrollada", "3/4 taza de leche sin lactosa", "1 cucharadita de semillas de chía", "1/4 taza de arándanos", "Canela"],
+    "steps": ["Mezclar la avena, la leche y la chía.", "Dejar reposar en la heladera durante la noche.", "Agregar los arándanos y la canela.", "Servir fría o calentar antes de comer."],
+    "time": "10 minutos más reposo",
+    "tags": ["desayuno", "vegetariana", "sin gluten"],
+    "published": true
+  },
+  {
+    "id": "sibo-test-19",
+    "name": "Pudding de arroz con frutillas",
+    "description": "Postre suave preparado con leche sin lactosa.",
+    "ingredients": ["1/2 taza de arroz blanco cocido", "1 taza de leche sin lactosa", "1 cucharadita de azúcar", "1/2 taza de frutillas", "Canela y esencia de vainilla"],
+    "steps": ["Colocar el arroz y la leche en una olla.", "Cocinar a fuego bajo hasta que quede cremoso.", "Agregar azúcar, vainilla y canela.", "Servir con frutillas cortadas."],
+    "time": "25 minutos",
+    "tags": ["postre", "sin gluten", "sin lactosa"],
+    "published": true
+  },
+  {
+    "id": "sibo-test-20",
+    "name": "Tofu firme con arroz y vegetales",
+    "description": "Salteado vegetariano con tofu firme y vegetales bajos en FODMAP.",
+    "ingredients": ["150 g de tofu firme", "1 taza de arroz blanco cocido", "1 taza de bok choy", "1 zanahoria pequeña", "1 cucharada de salsa tamari sin gluten", "1 cucharadita de aceite de sésamo"],
+    "steps": ["Escurrir y cortar el tofu en cubos.", "Dorar el tofu con el aceite de sésamo.", "Agregar la zanahoria y el bok choy.", "Incorporar el arroz y el tamari, y saltear unos minutos."],
+    "time": "25 minutos",
+    "tags": ["vegetariana", "tofu", "sin gluten"],
+    "published": true
+  }
+]

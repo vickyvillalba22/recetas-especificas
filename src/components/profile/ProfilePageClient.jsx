@@ -65,7 +65,7 @@ export function ProfilePageClient() {
     setError('')
     try {
       await logout()
-      router.replace('/bienvenida')
+      router.replace('/')
     } catch (logoutError) {
       setError(logoutError.message || 'No pudimos cerrar la sesión.')
       setLoggingOut(false)

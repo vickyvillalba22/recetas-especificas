@@ -1,4 +1,4 @@
-import { BookHeart, PencilEdit, Trash } from "../ui/icons";
+import { BookHeart, Download, PencilEdit, Trash } from "../ui/icons";
 
 export function JournalSection({
   journalText,
@@ -12,6 +12,8 @@ export function JournalSection({
   saving,
   error,
   journalEntries,
+  onDownload,
+  downloadDisabled,
 }) {
   return (
     <section
@@ -71,12 +73,23 @@ export function JournalSection({
           )}
         </div>
         <div className="rounded-2xl bg-cream p-5 dark:bg-ink sm:p-6">
-          <div className="mb-5 flex items-center justify-between">
-            <h3 className="font-display text-xl">Tus registros</h3>
-            <span className="text-xs font-bold text-ink/40 dark:text-cream/40">
-              {journalEntries.length}{" "}
-              {journalEntries.length === 1 ? "entrada" : "entradas"}
-            </span>
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 className="font-display text-xl">Tus registros</h3>
+              <span className="text-xs font-bold text-ink/40 dark:text-cream/40">
+                {journalEntries.length}{" "}
+                {journalEntries.length === 1 ? "entrada" : "entradas"}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={onDownload}
+              disabled={downloadDisabled}
+              className="inline-flex items-center gap-2 rounded-full border border-moss/25 px-3.5 py-2 text-xs font-bold text-moss transition hover:bg-sage disabled:cursor-not-allowed disabled:opacity-40 dark:border-sage/20 dark:text-sage dark:hover:bg-moss/30"
+            >
+              <Download size={15} />
+              Descargar PDF
+            </button>
           </div>
           {loading ? (
             <div className="grid min-h-48 place-items-center rounded-xl border border-dashed border-ink/15 px-6 text-center dark:border-cream/15">

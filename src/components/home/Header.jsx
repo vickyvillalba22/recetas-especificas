@@ -8,18 +8,17 @@ import { Leaf, Moon, Sun } from '../ui/icons'
 const backLabels = {
   '/admin': 'Volver al inicio',
   '/admin/recetas': 'Volver al panel',
-  '/login': 'Volver a bienvenida',
+  '/login': 'Volver al inicio',
   '/mis-recetas': 'Volver al perfil',
-  '/registro': 'Volver a bienvenida',
+  '/registro': 'Volver al inicio',
 }
 
-const knownPaths = new Set(['/', '/admin', '/admin/recetas', '/bienvenida', '/diario', '/login', '/mis-recetas', '/perfil', '/recetas', '/registro'])
+const knownPaths = new Set(['/', '/admin', '/admin/recetas', '/diario', '/login', '/mis-recetas', '/perfil', '/recetas', '/registro'])
 
 export function Header({ theme, onThemeToggle, user, isAdmin }) {
   const pathname = usePathname()
   const backLabel = backLabels[pathname] || (!knownPaths.has(pathname) ? 'Volver atrás' : '')
-  const isWelcomePage = pathname === '/bienvenida'
-  const showNavigation = Boolean(user && !isWelcomePage)
+  const showNavigation = Boolean(user)
 
   return (
     <header className="sticky top-0 z-30 border-b border-ink/10 bg-cream/90 backdrop-blur-sm dark:border-cream/10 dark:bg-ink-dark/85">
@@ -34,7 +33,6 @@ export function Header({ theme, onThemeToggle, user, isAdmin }) {
             <Link href="/recetas">Recetas generales</Link>
             <Link href="/diario">Diario</Link>
             {user && <Link href="/perfil">Mi perfil</Link>}
-            {isAdmin && <Link href="/admin">Admin</Link>}
           </nav>
         )}
         <div className="flex items-center gap-2">

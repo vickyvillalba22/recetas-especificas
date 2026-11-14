@@ -30,8 +30,7 @@ La aplicación estará disponible en `http://localhost:3000`.
 
 ## Rutas actuales
 
-- `/`: menú principal.
-- `/bienvenida`: bienvenida inicial.
+- `/`: bienvenida para usuarios no autenticados y menú semanal para usuarios autenticados.
 - `/login`: placeholder de inicio de sesión.
 - `/registro`: placeholder de registro.
 - `/recetas`: galería de recetas generales.
@@ -69,3 +68,21 @@ npm run admin:bootstrap -- tu-email@gmail.com
 ```
 
 Después, cierra sesión y vuelve a ingresar para renovar el token con el rol `admin`. Las credenciales privadas nunca deben comenzar con `NEXT_PUBLIC_` ni subirse al repositorio.
+
+## Carga de recetas de prueba
+
+Las recetas públicas de prueba se definen en `data/recipes.json` y se pueden cargar en la colección `publicRecipes` usando Firebase Admin SDK. El script valida los datos y usa IDs fijos, por lo que se puede ejecutar nuevamente sin duplicar estas recetas.
+
+Para validar el archivo sin escribir en Firebase:
+
+```bash
+npm run seed:recipes -- --dry-run
+```
+
+Para realizar la carga:
+
+```bash
+npm run seed:recipes
+```
+
+El comando requiere las variables privadas `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL` y `FIREBASE_PRIVATE_KEY` en `.env.local`. Nunca ejecutes este script con esas credenciales en el navegador ni subas `.env.local` al repositorio.
