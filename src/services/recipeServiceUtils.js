@@ -15,13 +15,14 @@ export function mapRecipeSnapshot(snapshot) {
     steps: normalizeRecipeArray(data.steps),
     time: data.time || '',
     tags: normalizeRecipeArray(data.tags),
+    imageUrl: data.imageUrl || '',
     published: data.published !== false,
     createdAt: firebaseTimestampToISOString(data.createdAt),
     updatedAt: firebaseTimestampToISOString(data.updatedAt),
   }
 }
 
-export function recipePayload({ name, description = '', ingredients = [], steps = [], time = '', tags = [] }) {
+export function recipePayload({ name, description = '', ingredients = [], steps = [], time = '', tags = [], imageUrl = '' }) {
   return {
     name,
     description,
@@ -29,5 +30,6 @@ export function recipePayload({ name, description = '', ingredients = [], steps 
     steps: normalizeRecipeArray(steps),
     time,
     tags: normalizeRecipeArray(tags),
+    imageUrl: typeof imageUrl === 'string' ? imageUrl.trim() : '',
   }
 }

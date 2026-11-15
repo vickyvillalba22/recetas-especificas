@@ -7,6 +7,7 @@
     "steps": ["Batir los huevos con sal y pimienta.", "Saltear la espinaca y el tomate en el aceite.", "Agregar los huevos y cocinar hasta que estén firmes.", "Doblar el omelette y servir caliente."],
     "time": "15 minutos",
     "tags": ["desayuno", "rápida", "bajo en FODMAP"],
+    "imageUrl": "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&w=1200&q=80",
     "published": true
   },
   {
@@ -17,6 +18,7 @@
     "steps": ["Cortar el pollo y el zucchini en trozos.", "Cocinar el pollo con aceite, sal y pimienta.", "Agregar el zucchini y cocinar hasta que esté tierno.", "Servir con el arroz y unas gotas de limón."],
     "time": "30 minutos",
     "tags": ["almuerzo", "pollo", "bajo en FODMAP"],
+    "imageUrl": "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=1200&q=80",
     "published": true
   },
   {
@@ -27,6 +29,7 @@
     "steps": ["Cortar la papa y la zanahoria en cubos.", "Hornear los vegetales con aceite durante 20 minutos.", "Agregar el salmón condimentado con limón y eneldo.", "Hornear 12 a 15 minutos más y servir."],
     "time": "40 minutos",
     "tags": ["cena", "pescado", "horno"],
+    "imageUrl": "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=1200&q=80",
     "published": true
   },
   {
@@ -37,6 +40,7 @@
     "steps": ["Cortar el pavo, el pepino y la zanahoria.", "Colocar la lechuga en un bol.", "Agregar la quinoa y el resto de los ingredientes.", "Condimentar con aceite de oliva y limón."],
     "time": "20 minutos",
     "tags": ["ensalada", "almuerzo", "sin gluten"],
+    "imageUrl": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1200&q=80",
     "published": true
   },
   {
@@ -47,6 +51,7 @@
     "steps": ["Saltear los camarones con el jengibre.", "Agregar la zanahoria y el bok choy.", "Incorporar el arroz cocido.", "Condimentar con tamari y cocinar unos minutos."],
     "time": "25 minutos",
     "tags": ["mariscos", "rápida", "sin gluten"],
+    "imageUrl": "https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=1200&q=80",
     "published": true
   },
   {
@@ -57,6 +62,7 @@
     "steps": ["Hervir las papas hasta que estén tiernas.", "Pisar las papas con aceite de oliva, sal y pimienta.", "Condimentar la carne con mostaza, sal y pimienta.", "Cocinar la carne a la plancha y servir con el puré."],
     "time": "35 minutos",
     "tags": ["carne", "cena", "sin lácteos"],
+    "imageUrl": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80",
     "published": true
   },
   {
@@ -67,6 +73,7 @@
     "steps": ["Cocinar la polenta según las indicaciones del envase.", "Cocinar la merluza a la plancha con sal, pimienta y limón.", "Saltear la espinaca con aceite de oliva.", "Servir la merluza junto con la polenta y la espinaca."],
     "time": "25 minutos",
     "tags": ["pescado", "cena", "sin gluten"],
+    "imageUrl": "https://images.unsplash.com/photo-1544943910-4c1dc44aab44?auto=format&fit=crop&w=1200&q=80",
     "published": true
   },
   {
@@ -77,6 +84,7 @@
     "steps": ["Cortar el pollo, la zanahoria y la calabaza.", "Calentar el caldo y agregar los vegetales.", "Incorporar el pollo y cocinar hasta que esté completamente cocido.", "Terminar con la parte verde de la cebolla de verdeo."],
     "time": "35 minutos",
     "tags": ["sopa", "pollo", "sin lácteos"],
+    "imageUrl": "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1200&q=80",
     "published": true
   },
   {
@@ -87,6 +95,7 @@
     "steps": ["Hidratar los fideos de arroz según el paquete.", "Saltear el pollo con el jengibre.", "Agregar la zanahoria y el bok choy.", "Incorporar los fideos y el tamari, y mezclar."],
     "time": "25 minutos",
     "tags": ["pollo", "fideos", "rápida"],
+    "imageUrl": "https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&w=1200&q=80",
     "published": true
   },
   {
@@ -97,6 +106,7 @@
     "steps": ["Hervir la papa y cortarla en cubos.", "Lavar y cortar las verduras.", "Mezclar la papa, el atún y las verduras.", "Condimentar con aceite de oliva y limón."],
     "time": "25 minutos",
     "tags": ["ensalada", "atún", "sin lácteos"],
+    "imageUrl": "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1200&q=80",
     "published": true
   },
   {
@@ -107,6 +117,7 @@
     "steps": ["Mezclar el pavo con el huevo, la avena y los condimentos.", "Formar una hamburguesa.", "Cocinar a la plancha hasta que esté completamente cocida.", "Servir con lechuga y tomate."],
     "time": "25 minutos",
     "tags": ["pavo", "rápida", "almuerzo"],
+    "imageUrl": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&w=1200&q=80",
     "published": true
   },
   {
@@ -117,6 +128,7 @@
     "steps": ["Cortar la berenjena por la mitad y retirar parte de la pulpa.", "Cocinar el pavo con la pulpa de berenjena y el tomate.", "Mezclar con la quinoa y condimentar.", "Rellenar la berenjena y hornear durante 20 minutos."],
     "time": "45 minutos",
     "tags": ["horno", "pavo", "sin gluten"],
+    "imageUrl": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=1200&q=80",
     "published": true
   },
   {
@@ -127,6 +139,7 @@
     "steps": ["Condimentar el pollo con limón, sal, pimienta y tomillo.", "Cocinarlo en una sartén con aceite de oliva.", "Cocinar la zanahoria y las chauchas al vapor.", "Servir el pollo junto con los vegetales."],
     "time": "30 minutos",
     "tags": ["pollo", "sin gluten", "sin lácteos"],
+    "imageUrl": "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=1200&q=80",
     "published": true
   },
   {
@@ -137,6 +150,7 @@
     "steps": ["Calentar la quinoa cocida.", "Agregar la espinaca para que se ablande ligeramente.", "Incorporar el salmón desmenuzado y el pepino.", "Condimentar con limón, aceite, sal y pimienta."],
     "time": "20 minutos",
     "tags": ["salmón", "bowl", "sin gluten"],
+    "imageUrl": "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=1200&q=80",
     "published": true
   },
   {
@@ -147,6 +161,7 @@
     "steps": ["Cocinar la papa en cubos hasta que esté tierna.", "Saltear el zucchini con el aceite.", "Batir los huevos con ciboulette, sal y pimienta.", "Mezclar todo y cocinar a fuego bajo hasta que cuaje."],
     "time": "30 minutos",
     "tags": ["huevos", "vegetariana", "cena"],
+    "imageUrl": "https://images.unsplash.com/photo-1517673400267-0251440c45dc?auto=format&fit=crop&w=1200&q=80",
     "published": true
   },
   {
@@ -157,6 +172,7 @@
     "steps": ["Cortar el morrón y la zanahoria en tiras.", "Dorar la carne con aceite y pimentón.", "Agregar los vegetales y cocinar hasta que estén tiernos.", "Incorporar el arroz y mezclar antes de servir."],
     "time": "30 minutos",
     "tags": ["carne", "arroz", "almuerzo"],
+    "imageUrl": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=1200&q=80",
     "published": true
   },
   {
@@ -167,6 +183,7 @@
     "steps": ["Condimentar los camarones con limón, pimentón, sal y pimienta.", "Cocinarlos en una sartén hasta que estén rosados.", "Calentar las tortillas de maíz.", "Rellenar con camarones, repollo y palta."],
     "time": "20 minutos",
     "tags": ["camarones", "rápida", "sin gluten"],
+    "imageUrl": "https://images.unsplash.com/photo-1552332386-f8dd00dc2f85?auto=format&fit=crop&w=1200&q=80",
     "published": true
   },
   {
@@ -177,6 +194,7 @@
     "steps": ["Mezclar la avena, la leche y la chía.", "Dejar reposar en la heladera durante la noche.", "Agregar los arándanos y la canela.", "Servir fría o calentar antes de comer."],
     "time": "10 minutos más reposo",
     "tags": ["desayuno", "vegetariana", "sin gluten"],
+    "imageUrl": "https://images.unsplash.com/photo-1517673400267-0251440c45dc?auto=format&fit=crop&w=1200&q=80",
     "published": true
   },
   {
@@ -187,6 +205,7 @@
     "steps": ["Colocar el arroz y la leche en una olla.", "Cocinar a fuego bajo hasta que quede cremoso.", "Agregar azúcar, vainilla y canela.", "Servir con frutillas cortadas."],
     "time": "25 minutos",
     "tags": ["postre", "sin gluten", "sin lactosa"],
+    "imageUrl": "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=1200&q=80",
     "published": true
   },
   {
@@ -197,6 +216,7 @@
     "steps": ["Escurrir y cortar el tofu en cubos.", "Dorar el tofu con el aceite de sésamo.", "Agregar la zanahoria y el bok choy.", "Incorporar el arroz y el tamari, y saltear unos minutos."],
     "time": "25 minutos",
     "tags": ["vegetariana", "tofu", "sin gluten"],
+    "imageUrl": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1200&q=80",
     "published": true
   }
 ]

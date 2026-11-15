@@ -54,6 +54,10 @@ function validateRecipes(recipes) {
     assertStringArray(recipe.steps, 'steps', recipe.id)
     assertStringArray(recipe.tags, 'tags', recipe.id)
 
+    if (recipe.imageUrl !== undefined && (typeof recipe.imageUrl !== 'string' || !/^https?:\/\//.test(recipe.imageUrl))) {
+      throw new Error(`La receta ${recipe.id} necesita una imageUrl válida.`)
+    }
+
     if (ids.has(recipe.id)) {
       throw new Error(`El id de receta está repetido: ${recipe.id}.`)
     }
@@ -102,6 +106,7 @@ recipes.forEach((recipe, index) => {
     steps: recipe.steps.map((item) => item.trim()),
     time: recipe.time.trim(),
     tags: recipe.tags.map((tag) => tag.trim()),
+    imageUrl: recipe.imageUrl?.trim() || '',
     createdBy: SEED_AUTHOR,
     published: recipe.published,
     updatedAt: FieldValue.serverTimestamp(),

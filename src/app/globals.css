@@ -94,4 +94,11 @@
   .shopping-list-scroll::-webkit-scrollbar-thumb:hover {
     background: #f8d873;
   }
+  .scrollbar-hidden {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
 }

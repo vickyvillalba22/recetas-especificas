@@ -112,6 +112,17 @@ export function RecipeFormModal({ recipe, onClose, onSubmit, loading, error }) {
               />
             </label>
           </div>
+          <label className="block text-sm font-bold">
+            Imagen
+            <span className="font-normal text-ink/40 dark:text-cream/40"> (URL opcional)</span>
+            <input
+              type="url"
+              name="imageUrl"
+              defaultValue={recipe?.imageUrl || ""}
+              className="field mt-2"
+              placeholder="https://..."
+            />
+          </label>
           {error && (
             <p className="rounded-xl bg-coral/10 p-3 text-sm text-coral">
               {error}

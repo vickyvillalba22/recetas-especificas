@@ -1,10 +1,9 @@
-import Link from "next/link";
-import { BookHeart, CirclePlus, Clock3, Star, X } from "../ui/icons";
+"use client";
 
-// Shared by the public recipes and admin recipe pages.
-function formatList(values) {
-  return Array.isArray(values) ? values : [];
-}
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import { BookHeart, Check, CirclePlus, Filter } from "../ui/icons";
+import { RecipeCard } from "./RecipeCard";
 
 export function RecipeGallery({
   recipes,
@@ -14,6 +13,7 @@ export function RecipeGallery({
   onEditRecipe,
   onDeleteRecipe,
   onAddToMenu,
+  onViewDetails,
   favoriteRecipeIds = new Set(),
   onToggleFavorite,
   favoriteLoading = false,
@@ -21,6 +21,9 @@ export function RecipeGallery({
   favoriteError = "",
   mode = "personal",
 }) {
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [fodmapOnly, setFodmapOnly] = useState(false);
+  const filterRef = useRef(null);
   const isPublic = mode === "public";
   const isAdmin = mode === "admin";
   const isFavorites = mode === "favorites";
@@ -61,6 +64,31 @@ export function RecipeGallery({
       : isFavorites
         ? "Volvé a encontrar las recetas generales que guardaste."
         : "Guardá tus recetas personales para volver a encontrarlas al organizar tu semana.";
+  const visibleRecipes = fodmapOnly
+    ? recipes.filter((recipe) => formatTags(recipe.tags).some((tag) => tag.toLocaleLowerCase() === "bajo en fodmap"))
+    : recipes;
+
+  function formatTags(values) {
+    return Array.isArray(values) ? values.map((tag) => String(tag).trim()) : [];
+  }
+
+  useEffect(() => {
+    if (!filterOpen) return undefined;
+
+    const handlePointerDown = (event) => {
+      if (!filterRef.current?.contains(event.target)) setFilterOpen(false);
+    };
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") setFilterOpen(false);
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [filterOpen]);
 
   return (
     <section
@@ -88,6 +116,33 @@ export function RecipeGallery({
               <Link href="/recetas-favoritas" className="rounded-full border border-sun/50 px-4 py-2.5 text-xs font-bold text-ink transition hover:bg-sun/20 dark:text-cream">
                 Ver mis favoritos
               </Link>
+              <div ref={filterRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setFilterOpen((current) => !current)}
+                  className={`grid h-10 w-10 place-items-center rounded-full border transition ${fodmapOnly ? "border-moss bg-sage text-moss dark:border-sage dark:bg-moss/30 dark:text-sage" : "border-ink/15 text-ink/60 hover:bg-sage hover:text-moss dark:border-cream/15 dark:text-cream/70 dark:hover:bg-moss/30"}`}
+                  aria-label="Filtrar recetas"
+                  aria-expanded={filterOpen}
+                  title="Filtrar recetas"
+                >
+                  <Filter size={18} />
+                </button>
+                {filterOpen && (
+                  <div className="absolute right-0 top-12 z-20 w-60 rounded-2xl border border-ink/10 bg-white p-2 shadow-soft dark:border-cream/10 dark:bg-ink-soft">
+                    <button
+                      type="button"
+                      onClick={() => setFodmapOnly((current) => !current)}
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold text-ink transition hover:bg-sage/60 dark:text-cream dark:hover:bg-moss/30"
+                      aria-pressed={fodmapOnly}
+                    >
+                      <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-md border ${fodmapOnly ? "border-moss bg-moss text-white" : "border-ink/20 dark:border-cream/25"}`}>
+                        {fodmapOnly && <Check size={14} />}
+                      </span>
+                      Bajo en FODMAP
+                    </button>
+                  </div>
+                )}
+              </div>
             </>
           )}
           {canManage && onAddRecipe && (
@@ -115,7 +170,7 @@ export function RecipeGallery({
           {favoriteError}
         </p>
       )}
-      {!loading && !error && recipes.length === 0 && (
+      {!loading && !error && visibleRecipes.length === 0 && (
         <div className="grid min-h-40 place-items-center rounded-2xl border border-dashed border-ink/15 px-6 text-center dark:border-cream/15">
           <div>
             <BookHeart
@@ -123,11 +178,13 @@ export function RecipeGallery({
               size={26}
             />
             <p className="text-sm font-semibold text-ink/60 dark:text-cream/60">
-              Todavía no hay recetas
+              {fodmapOnly ? "No hay recetas con este filtro" : "Todavía no hay recetas"}
             </p>
             <p className="mt-1 text-xs text-ink/40 dark:text-cream/40">
               {isPublic
-                ? "Las recetas generales aparecerán aquí."
+                ? fodmapOnly
+                  ? "Probá quitar el filtro para ver todas las recetas."
+                  : "Las recetas generales aparecerán aquí."
                 : isFavorites
                   ? "Las recetas que guardes aparecerán aquí."
                   : "Agregá tu primera receta para verla aquí."}
@@ -135,83 +192,24 @@ export function RecipeGallery({
           </div>
         </div>
       )}
-      {!loading && recipes.length > 0 && (
+      {!loading && visibleRecipes.length > 0 && (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {recipes.map((recipe) => (
-            <article
+          {visibleRecipes.map((recipe) => (
+            <RecipeCard
               key={recipe.id}
-              className="flex flex-col rounded-2xl border border-ink/10 bg-cream p-5 dark:border-cream/10 dark:bg-ink"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h3 className="font-display text-2xl text-moss dark:text-sage">
-                    {recipe.name}
-                  </h3>
-                  {recipe.time && (
-                    <p className="mt-2 flex items-center gap-1 text-xs font-bold text-coral">
-                      <Clock3 size={13} /> {recipe.time}
-                    </p>
-                  )}
-                </div>
-                <div className="flex shrink-0 items-center gap-1">
-                  {(isPublic || isFavorites) && onToggleFavorite && (
-                    <button
-                      type="button"
-                      onClick={() => onToggleFavorite(recipe)}
-                      disabled={favoriteLoading || favoriteSavingId === recipe.id}
-                      className={`grid h-9 w-9 place-items-center rounded-full transition disabled:cursor-not-allowed disabled:opacity-50 ${favoriteRecipeIds.has(recipe.id) ? 'bg-sun/20 text-sun' : 'text-ink/35 hover:bg-sun/10 hover:text-sun dark:text-cream/40'}`}
-                      aria-label={favoriteRecipeIds.has(recipe.id) ? `Quitar ${recipe.name} de favoritos` : `Agregar ${recipe.name} a favoritos`}
-                      aria-pressed={favoriteRecipeIds.has(recipe.id)}
-                    >
-                      <Star size={18} className={favoriteRecipeIds.has(recipe.id) ? 'fill-current' : ''} />
-                    </button>
-                  )}
-                  {canManage && onDeleteRecipe && (
-                    <button
-                      type="button"
-                      onClick={() => onDeleteRecipe(recipe)}
-                      className="rounded-full p-2 text-ink/40 transition hover:bg-coral/10 hover:text-coral dark:text-cream/40"
-                      aria-label={`Eliminar ${recipe.name}`}
-                    >
-                      <X size={17} />
-                    </button>
-                  )}
-                </div>
-              </div>
-              {recipe.description && (
-                <p className="mt-3 text-sm leading-relaxed text-ink/60 dark:text-cream/60">
-                  {recipe.description}
-                </p>
-              )}
-              {formatList(recipe.tags).length > 0 && (
-                <div className="mt-4 flex flex-wrap gap-1.5">
-                  {formatList(recipe.tags).map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full bg-sage px-2.5 py-1 text-[10px] font-bold text-moss dark:bg-moss/30 dark:text-sage"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-              <div className="mt-auto flex flex-wrap gap-2 pt-5">
-                <button
-                  onClick={() => onAddToMenu(recipe)}
-                  className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-moss px-3 py-2.5 text-xs font-bold text-white transition hover:bg-ink"
-                >
-                  <CirclePlus size={14} /> Agregar al menú
-                </button>
-                {canManage && onEditRecipe && (
-                  <button
-                    onClick={() => onEditRecipe(recipe)}
-                    className="rounded-full border border-ink/15 px-4 py-2.5 text-xs font-bold text-ink/70 transition hover:bg-white dark:border-cream/15 dark:text-cream/70 dark:hover:bg-ink-soft"
-                  >
-                    Editar
-                  </button>
-                )}
-              </div>
-            </article>
+              recipe={recipe}
+              isPublic={isPublic}
+              isFavorites={isFavorites}
+              canManage={canManage}
+              onAddToMenu={onAddToMenu}
+              onViewDetails={onViewDetails}
+              onToggleFavorite={onToggleFavorite}
+              favoriteRecipeIds={favoriteRecipeIds}
+              favoriteLoading={favoriteLoading}
+              favoriteSavingId={favoriteSavingId}
+              onDeleteRecipe={onDeleteRecipe}
+              onEditRecipe={onEditRecipe}
+            />
           ))}
         </div>
       )}

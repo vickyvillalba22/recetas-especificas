@@ -11,7 +11,9 @@ export const CirclePlus = (props) => <HugeIcon icon="add-circle" {...props} />
 export const Clock3 = (props) => <HugeIcon icon="clock-01" {...props} />
 export const Copy = (props) => <HugeIcon icon="copy-01" {...props} />
 export const Download = (props) => <HugeIcon icon="download-04" {...props} />
+export const Filter = (props) => <HugeIcon icon="filter" {...props} />
 export const Home = (props) => <HugeIcon icon="home-01" {...props} />
+export const Info = (props) => <HugeIcon icon="information-circle" {...props} />
 export const Leaf = (props) => <HugeIcon icon="organic-food" {...props} />
 export const ListChecks = (props) => <HugeIcon icon="list-checks" {...props} />
 export const LogOut = (props) => <HugeIcon icon="logout-01" {...props} />

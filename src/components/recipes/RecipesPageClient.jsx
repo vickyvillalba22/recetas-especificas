@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { RecipeFormModal } from "./RecipeFormModal";
 import { RecipeGallery } from "./RecipeGallery";
+import { RecipeDetailsModal } from "./RecipeDetailsModal";
 import { RemoveFavoriteModal } from "./RemoveFavoriteModal";
 import {
   createPersonalRecipe,
@@ -37,6 +38,7 @@ export function RecipesPageClient({ mode = "public" }) {
   const [favoriteToRemove, setFavoriteToRemove] = useState(null);
   const [favoriteRemoveLoading, setFavoriteRemoveLoading] = useState(false);
   const [favoriteError, setFavoriteError] = useState("");
+  const [detailsRecipe, setDetailsRecipe] = useState(null);
   const [formRecipe, setFormRecipe] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState("");
@@ -118,6 +120,7 @@ export function RecipesPageClient({ mode = "public" }) {
         ?.split(",")
         .map((tag) => tag.trim())
         .filter(Boolean),
+      imageUrl: form.get("imageUrl")?.trim(),
     };
     if (!data.name || !isPersonal) return;
 
@@ -212,6 +215,7 @@ export function RecipesPageClient({ mode = "public" }) {
            onEditRecipe={isPersonal ? openForm : undefined}
            onDeleteRecipe={isPersonal ? removeRecipe : undefined}
            onAddToMenu={addToMenu}
+           onViewDetails={!isPersonal ? setDetailsRecipe : undefined}
            favoriteRecipeIds={favoriteRecipeIds}
            onToggleFavorite={!isPersonal ? toggleFavorite : undefined}
            favoriteLoading={favoriteLoading}
@@ -235,6 +239,17 @@ export function RecipesPageClient({ mode = "public" }) {
           onConfirm={removeFavorite}
           loading={favoriteRemoveLoading}
           error={favoriteError}
+        />
+      )}
+      {detailsRecipe && (
+        <RecipeDetailsModal
+          recipe={detailsRecipe}
+          onClose={() => setDetailsRecipe(null)}
+          onAddToMenu={addToMenu}
+          onToggleFavorite={toggleFavorite}
+          isFavorite={favoriteRecipeIds.has(detailsRecipe.id)}
+          favoriteLoading={favoriteLoading}
+          favoriteSaving={favoriteSavingId === detailsRecipe.id}
         />
       )}
     </div>

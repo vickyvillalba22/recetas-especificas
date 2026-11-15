@@ -41,6 +41,7 @@ export function AdminRecipes() {
       steps: form.get('steps')?.split('\n').map((item) => item.trim()).filter(Boolean),
       time: form.get('time')?.trim(),
       tags: form.get('tags')?.split(',').map((tag) => tag.trim()).filter(Boolean),
+      imageUrl: form.get('imageUrl')?.trim(),
     }
     if (!data.name) return
 
