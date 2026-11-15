@@ -15,7 +15,7 @@ function readTheme() {
   }
 }
 
-const protectedPaths = new Set(['/recetas', '/mis-recetas', '/recetas-favoritas', '/diario', '/perfil'])
+const protectedPaths = new Set(['/recetas', '/mis-recetas', '/recetas-favoritas', '/diario', '/perfil', '/perfil/editar', '/perfil/configurar-cuenta', '/onboarding'])
 
 function isAdminPath(pathname) {
   return pathname === '/admin' || pathname.startsWith('/admin/')
@@ -60,16 +60,19 @@ function AppShellContent({ children }) {
   const adminUnauthorized = isAdminPath(pathname) && user && !isAdmin
   const shouldShowApp = !protectedRoute || (user && !adminUnauthorized)
   const isAuthPage = pathname === '/login' || pathname === '/registro'
-  const showBottomNavigation = Boolean(user && !loading && !isAuthPage && shouldShowApp)
+  const isOnboardingPage = pathname === '/onboarding'
+  const showBottomNavigation = Boolean(user && !loading && !isAuthPage && !isOnboardingPage && shouldShowApp)
 
   return (
     <>
-      <Header
-        theme={theme}
-        onThemeToggle={toggleTheme}
-        user={user}
-        isAdmin={isAdmin}
-      />
+      {!isOnboardingPage && (
+        <Header
+          theme={theme}
+          onThemeToggle={toggleTheme}
+          user={user}
+          isAdmin={isAdmin}
+        />
+      )}
       {loading && protectedRoute ? <LoadingScreen /> : shouldShowApp ? children : null}
       {showBottomNavigation && <BottomNavigation />}
     </>

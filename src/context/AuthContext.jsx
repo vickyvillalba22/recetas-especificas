@@ -28,6 +28,9 @@ async function ensureUserProfile(user) {
   if (!existingProfile.exists()) {
     profileData.role = 'user'
     profileData.createdAt = serverTimestamp()
+    profileData.perfilSalud = {}
+  } else if (!Object.prototype.hasOwnProperty.call(existingProfile.data(), 'perfilSalud')) {
+    profileData.perfilSalud = {}
   }
 
   await setDoc(profileRef, profileData, { merge: true })
@@ -99,6 +102,14 @@ export function AuthProvider({ children }) {
     setRole(tokenResult.claims.role || 'user')
   }
 
+  async function refreshProfile() {
+    if (!auth.currentUser) return null
+    const profileSnapshot = await getDoc(doc(db, 'users', auth.currentUser.uid))
+    const nextProfile = profileSnapshot.data() || null
+    setProfile(nextProfile)
+    return nextProfile
+  }
+
   const value = useMemo(() => ({
     user,
     profile,
@@ -115,6 +126,7 @@ export function AuthProvider({ children }) {
     },
     logout: () => signOut(auth),
     refreshRole,
+    refreshProfile,
   }), [loading, profile, role, user])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

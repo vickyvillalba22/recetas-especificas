@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
-import { BookHeart, LogOut, Settings, Star, UserCircle } from '../ui/icons'
+import { BookHeart, LogOut, PencilEdit, Settings, Star, UserCircle } from '../ui/icons'
 
 function LogoutModal({ onClose, onConfirm, loading }) {
   return (
@@ -88,6 +88,16 @@ export function ProfilePageClient() {
           </div>
 
           <div className="mt-8 grid gap-3">
+            <Link href="/perfil/editar" className="flex items-center gap-4 rounded-2xl border border-moss/20 bg-sage/30 p-4 transition hover:border-moss/40 hover:bg-sage/50 dark:border-sage/20 dark:bg-moss/20 dark:hover:bg-moss/30">
+              <span className="grid h-11 w-11 place-items-center rounded-xl bg-white text-moss dark:bg-ink-soft dark:text-sage">
+                <PencilEdit size={22} />
+              </span>
+              <span>
+                <strong className="block text-sm">Editar perfil de salud</strong>
+                <span className="mt-1 block text-xs text-ink/55 dark:text-cream/55">Actualizá tus datos médicos, preferencias y restricciones.</span>
+              </span>
+            </Link>
+
             {isAdmin && <Link href="/admin" className="flex items-center gap-4 rounded-2xl border border-moss/20 bg-sage/30 p-4 transition hover:border-moss/40 hover:bg-sage/50 dark:border-sage/20 dark:bg-moss/20 dark:hover:bg-moss/30">
               <span className="grid h-11 w-11 place-items-center rounded-xl bg-white text-moss dark:bg-ink-soft dark:text-sage">
                 <Settings size={22} />
@@ -115,6 +125,16 @@ export function ProfilePageClient() {
               <span>
                 <strong className="block text-sm">Recetas favoritas</strong>
                 <span className="mt-1 block text-xs text-ink/55 dark:text-cream/55">Guardá las recetas generales que quieras tener a mano.</span>
+              </span>
+            </Link>
+
+            <Link href="/perfil/configurar-cuenta" className="flex items-center gap-4 rounded-2xl border border-ink/10 bg-cream p-4 transition hover:border-moss/30 hover:bg-sage/40 dark:border-cream/10 dark:bg-ink dark:hover:bg-moss/20">
+              <span className="grid h-11 w-11 place-items-center rounded-xl bg-white text-moss dark:bg-ink-soft dark:text-sage">
+                <Settings size={22} />
+              </span>
+              <span>
+                <strong className="block text-sm">Configurar cuenta</strong>
+                <span className="mt-1 block text-xs text-ink/55 dark:text-cream/55">Cambiá tu nombre de cuenta o contraseña.</span>
               </span>
             </Link>
 

@@ -20,7 +20,7 @@ export function RegisterForm() {
     setError('')
     try {
       await register(email.trim(), password, name.trim())
-      router.replace('/')
+      router.replace('/onboarding')
     } catch (registerError) {
       setError(getAuthErrorMessage(registerError))
     } finally {
@@ -33,7 +33,7 @@ export function RegisterForm() {
     setError('')
     try {
       await loginWithGoogle()
-      router.replace('/')
+      router.replace('/onboarding')
     } catch (registerError) {
       setError(getAuthErrorMessage(registerError))
     } finally {

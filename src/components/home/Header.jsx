@@ -20,6 +20,7 @@ export function Header({ theme, onThemeToggle, user, isAdmin }) {
   const pathname = usePathname()
   const backLabel = backLabels[pathname] || (!knownPaths.has(pathname) ? 'Volver atrás' : '')
   const showNavigation = Boolean(user)
+  const firstName = user?.displayName?.trim().split(/\s+/)[0] || ''
 
   return (
     <header className="sticky top-0 z-30 border-b border-ink/10 bg-cream/90 backdrop-blur-sm dark:border-cream/10 dark:bg-ink-dark/85">
@@ -37,6 +38,7 @@ export function Header({ theme, onThemeToggle, user, isAdmin }) {
           </nav>
         )}
         <div className="flex items-center gap-2">
+          {firstName && <span className="max-w-28 truncate text-sm font-semibold text-ink/70 dark:text-cream/75">{firstName}</span>}
           <button onClick={onThemeToggle} className="grid h-10 w-10 place-items-center rounded-full border border-ink/15 text-ink/70 transition hover:bg-white dark:border-cream/15 dark:text-cream/80 dark:hover:bg-ink-soft" aria-label={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}>{theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}</button>
         </div>
       </div>
