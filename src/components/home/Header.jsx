@@ -14,7 +14,7 @@ const backLabels = {
   '/registro': 'Volver al inicio',
 }
 
-const knownPaths = new Set(['/', '/admin', '/admin/recetas', '/diario', '/login', '/mis-recetas', '/perfil', '/recetas', '/recetas-favoritas', '/registro'])
+const knownPaths = new Set(['/', '/admin', '/admin/recetas', '/diario', '/login', '/mis-recetas', '/perfil', '/que-puedo-comer', '/recetas', '/recetas-favoritas', '/registro'])
 
 export function Header({ theme, onThemeToggle, user, isAdmin }) {
   const pathname = usePathname()
@@ -33,6 +33,7 @@ export function Header({ theme, onThemeToggle, user, isAdmin }) {
           <nav className="hidden items-center gap-8 text-sm font-medium text-ink/65 dark:text-cream/65 md:flex">
             <Link href="/">Inicio</Link>
             <Link href="/recetas">Recetas generales</Link>
+            <Link href="/que-puedo-comer">¿Qué puedo comer?</Link>
             <Link href="/diario">Diario</Link>
             {user && <Link href="/perfil">Mi perfil</Link>}
           </nav>

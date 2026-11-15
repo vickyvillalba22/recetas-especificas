@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BookHeart, Home, PencilEdit, UserCircle } from '../ui/icons'
+import { BookHeart, Home, PencilEdit, Sparkles, UserCircle } from '../ui/icons'
 
 const navigationItems = [
   { href: '/', label: 'Inicio', icon: Home },
   { href: '/recetas', label: 'Recetas', icon: BookHeart },
+  { href: '/que-puedo-comer', label: '¿Qué puedo comer?', icon: Sparkles },
   { href: '/diario', label: 'Diario', icon: PencilEdit },
   { href: '/perfil', label: 'Mi perfil', icon: UserCircle },
 ]
@@ -22,7 +23,7 @@ export function BottomNavigation() {
 
   return (
     <nav aria-label="Navegación principal" className="sticky bottom-6 z-40 mx-5 mb-3 rounded-full border border-ink/10 bg-white p-1 shadow-soft dark:border-sage/70 dark:bg-sage md:hidden">
-      <div className="mx-auto grid grid-cols-4 pb-[env(safe-area-inset-bottom)]">
+      <div className="mx-auto grid grid-cols-5 pb-[env(safe-area-inset-bottom)]">
         {navigationItems.map(({ href, label, icon: Icon }) => {
           const active = isItemActive(pathname, href)
 
