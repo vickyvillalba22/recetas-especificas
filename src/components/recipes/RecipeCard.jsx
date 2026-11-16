@@ -93,7 +93,7 @@ export function RecipeCard({
           >
             <CirclePlus size={19} />
           </button>
-          {isPublic && onViewDetails && (
+          {onViewDetails && (
             <button
               type="button"
               onClick={() => onViewDetails(recipe)}

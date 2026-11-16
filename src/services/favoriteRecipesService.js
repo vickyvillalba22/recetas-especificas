@@ -22,6 +22,7 @@ export async function saveFavoriteRecipe(recipe) {
       ...recipePayload(recipe),
       userId: getCurrentUserId(),
       sourceRecipeId: recipe.id,
+      origin: recipe.origin || 'general',
       published: true,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),

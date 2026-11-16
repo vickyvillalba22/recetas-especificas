@@ -1,16 +1,24 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '../../context/AuthContext'
+import { saveFavoriteRecipe } from '../../services/favoriteRecipesService'
+import { CirclePlus, Star } from '../ui/icons'
 
 const MAX_CACHE_ENTRIES = 10
 
 export function RecommendationsPanel() {
   const { user } = useAuth()
+  const router = useRouter()
   const [foodQuery, setFoodQuery] = useState('')
   const [result, setResult] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [favoriteError, setFavoriteError] = useState('')
+  const [favoriteRecipeIds, setFavoriteRecipeIds] = useState(() => new Set())
+  const [favoriteSavingId, setFavoriteSavingId] = useState(null)
+  const [debugResponse, setDebugResponse] = useState(null)
   const [cooldownSeconds, setCooldownSeconds] = useState(0)
   const cooldownTimerRef = useRef(null)
   const recommendationsCacheRef = useRef(new Map())
@@ -40,6 +48,46 @@ export function RecommendationsPanel() {
         return current - 1
       })
     }, 1000)
+  }
+
+  function normalizeGeneratedRecipe(recipe, index) {
+    const name = String(recipe.nombre || 'Receta sugerida').trim()
+    const slug = name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+
+    return {
+      ...recipe,
+      id: `gemini-${slug || 'receta'}-${index + 1}`,
+      name,
+      description: recipe.descripcion || '',
+      time: recipe.tiempo || '',
+      ingredients: Array.isArray(recipe.ingredientes) ? recipe.ingredientes : [],
+      steps: recipe.preparacion ? [recipe.preparacion] : [],
+      origin: 'gemini',
+      aiWarning: recipe.advertenciaIngredientes || '',
+    }
+  }
+
+  async function saveGeneratedFavorite(recipe) {
+    setFavoriteSavingId(recipe.id)
+    setFavoriteError('')
+    try {
+      await saveFavoriteRecipe(recipe)
+      setFavoriteRecipeIds((current) => new Set(current).add(recipe.id))
+    } catch (favoriteSaveError) {
+      setFavoriteError(favoriteSaveError.message)
+    } finally {
+      setFavoriteSavingId(null)
+    }
+  }
+
+  function addGeneratedRecipeToMenu(recipe) {
+    sessionStorage.setItem('sibo-recipe-to-add', JSON.stringify(recipe))
+    router.push('/?addRecipe=1')
   }
 
   async function requestRecommendations(event) {
@@ -75,10 +123,13 @@ export function RecommendationsPanel() {
 
     setIsLoading(true)
     setError('')
+    setFavoriteError('')
     setResult(null)
+    setDebugResponse(null)
+    setFavoriteRecipeIds(new Set())
 
     const controller = new AbortController()
-    const timeoutId = window.setTimeout(() => controller.abort(), 25000)
+    const timeoutId = window.setTimeout(() => controller.abort(), 120000)
 
     try {
       const token = await user.getIdToken()
@@ -97,6 +148,7 @@ export function RecommendationsPanel() {
       const payload = await response.json().catch(() => ({}))
 
       if (!response.ok) {
+        if (payload.debug) setDebugResponse(payload.debug)
         throw new Error(payload.error || 'No pudimos obtener recomendaciones.')
       }
 
@@ -104,13 +156,21 @@ export function RecommendationsPanel() {
         throw new Error('No recibimos recomendaciones para esta consulta.')
       }
 
+      if (payload.debug) setDebugResponse(payload.debug)
+
+      const normalizedResult = {
+        ...payload.result,
+        recetas: payload.result.recetas.map(normalizeGeneratedRecipe),
+      }
+
       if (recommendationsCacheRef.current.size >= MAX_CACHE_ENTRIES) {
         const oldestKey = recommendationsCacheRef.current.keys().next().value
         recommendationsCacheRef.current.delete(oldestKey)
       }
-      recommendationsCacheRef.current.set(cacheKey, payload.result)
-      setResult(payload.result)
+      recommendationsCacheRef.current.set(cacheKey, normalizedResult)
+      setResult(normalizedResult)
     } catch (requestError) {
+      if (requestError.debug) setDebugResponse(requestError.debug)
       setError(
         requestError.name === 'AbortError'
           ? 'La consulta tardó demasiado. Intentá nuevamente.'
@@ -150,6 +210,24 @@ export function RecommendationsPanel() {
           {error}
         </p>
       )}
+      {favoriteError && (
+        <p className="mt-4 rounded-xl bg-coral/10 p-3 text-sm text-coral">
+          {favoriteError}
+        </p>
+      )}
+      {debugResponse && (
+        <details className="mt-4 rounded-xl border border-ink/15 bg-ink/5 p-3 text-xs dark:border-cream/15 dark:bg-cream/5">
+          <summary className="cursor-pointer font-bold">
+            Respuesta cruda de Gemini (diagnóstico temporal)
+          </summary>
+          <p className="mt-2 text-ink/60 dark:text-cream/60">
+            Motivo de finalización: {debugResponse.finishReason}
+          </p>
+          <pre className="mt-2 max-h-96 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-white p-3 font-mono text-[11px] dark:bg-ink">
+            {debugResponse.rawResponse || '(respuesta vacía)'}
+          </pre>
+        </details>
+      )}
       <button
         type="submit"
         disabled={!foodQuery.trim() || isLoading || cooldownSeconds > 0}
@@ -182,10 +260,10 @@ export function RecommendationsPanel() {
                   Idea {index + 1}
                 </span>
                 <h4 className="mt-2 font-display text-xl">
-                  {recipe.nombre}
+                  {recipe.name}
                 </h4>
                 <p className="mt-2 text-sm leading-relaxed text-ink/65 dark:text-cream/65">
-                  {recipe.descripcion}
+                  {recipe.description}
                 </p>
                 <div className="mt-4">
                   <h5 className="text-xs font-bold uppercase tracking-wide text-ink/50 dark:text-cream/50">
@@ -210,6 +288,29 @@ export function RecommendationsPanel() {
                     {recipe.advertenciaIngredientes}
                   </p>
                 )}
+                <div className="mt-5 flex items-center justify-end gap-2 border-t border-ink/10 pt-4 dark:border-cream/10">
+                  <button
+                    type="button"
+                    onClick={() => saveGeneratedFavorite(recipe)}
+                    disabled={favoriteSavingId === recipe.id}
+                    className={`flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                      favoriteRecipeIds.has(recipe.id)
+                        ? 'border-sun/40 bg-sun/15 text-ink dark:text-cream'
+                        : 'border-ink/15 text-ink/60 hover:border-sun/50 hover:text-sun dark:border-cream/15 dark:text-cream/60'
+                    }`}
+                    aria-pressed={favoriteRecipeIds.has(recipe.id)}
+                  >
+                    <Star size={15} className={favoriteRecipeIds.has(recipe.id) ? 'fill-current text-sun' : ''} />
+                    {favoriteRecipeIds.has(recipe.id) ? 'Guardada' : 'Favorita'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => addGeneratedRecipeToMenu(recipe)}
+                    className="flex items-center gap-2 rounded-full bg-moss px-3 py-2 text-xs font-bold text-white transition hover:bg-ink"
+                  >
+                    <CirclePlus size={15} /> Menú
+                  </button>
+                </div>
               </article>
             ))}
           </div>

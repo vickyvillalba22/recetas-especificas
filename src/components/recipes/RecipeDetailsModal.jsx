@@ -16,7 +16,9 @@ export function RecipeDetailsModal({ recipe, onClose, onAddToMenu, onToggleFavor
               <BookHeart size={20} />
             </span>
             <div>
-              <p className="text-xs font-bold uppercase tracking-[.16em] text-coral">Receta general</p>
+              <p className="text-xs font-bold uppercase tracking-[.16em] text-coral">
+                {recipe.origin === 'gemini' ? 'Receta sugerida por IA' : 'Receta general'}
+              </p>
               <h2 id="recipe-details-title" className="font-display text-3xl">{recipe.name}</h2>
             </div>
           </div>
@@ -54,6 +56,11 @@ export function RecipeDetailsModal({ recipe, onClose, onAddToMenu, onToggleFavor
             </ol>
           </section>
         </div>
+        {recipe.aiWarning && (
+          <p className="mt-6 rounded-xl bg-sun/20 p-3 text-sm leading-relaxed text-ink/75 dark:text-cream/80">
+            {recipe.aiWarning}
+          </p>
+        )}
 
         <div className="mt-8 flex justify-end gap-2 border-t border-ink/10 pt-5 dark:border-cream/10">
           {onAddToMenu && (

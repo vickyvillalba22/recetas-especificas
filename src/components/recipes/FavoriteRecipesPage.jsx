@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { RecipeGallery } from './RecipeGallery'
+import { RecipeDetailsModal } from './RecipeDetailsModal'
 import { RemoveFavoriteModal } from './RemoveFavoriteModal'
 import { deleteFavoriteRecipe, getFavoriteRecipes } from '../../services/favoriteRecipesService'
 
@@ -14,6 +15,7 @@ export function FavoriteRecipesPage() {
   const [favoriteToRemove, setFavoriteToRemove] = useState(null)
   const [removeLoading, setRemoveLoading] = useState(false)
   const [removeError, setRemoveError] = useState('')
+  const [detailsRecipe, setDetailsRecipe] = useState(null)
 
   useEffect(() => {
     let active = true
@@ -67,6 +69,7 @@ export function FavoriteRecipesPage() {
           loading={loading}
           error={error}
           onAddToMenu={addToMenu}
+          onViewDetails={setDetailsRecipe}
           favoriteRecipeIds={new Set(recipes.map((recipe) => recipe.id))}
           onToggleFavorite={requestRemoveFavorite}
           favoriteError={removeError}
@@ -79,6 +82,17 @@ export function FavoriteRecipesPage() {
           onConfirm={removeFavorite}
           loading={removeLoading}
           error={removeError}
+        />
+      )}
+      {detailsRecipe && (
+        <RecipeDetailsModal
+          recipe={detailsRecipe}
+          onClose={() => setDetailsRecipe(null)}
+          onAddToMenu={addToMenu}
+          onToggleFavorite={requestRemoveFavorite}
+          isFavorite
+          favoriteLoading={removeLoading}
+          favoriteSaving={false}
         />
       )}
     </div>

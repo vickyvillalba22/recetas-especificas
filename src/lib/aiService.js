@@ -2,7 +2,7 @@ import 'server-only'
 
 import { GoogleGenAI, Type } from '@google/genai'
 
-const MODEL = 'gemini-3.8-flash'
+const MODEL = 'gemini-3.5-flash-lite'
 const JSON_MIME_TYPE = 'application/json'
 
 let aiClient
@@ -15,7 +15,10 @@ function getAIClient() {
     throw new Error('GEMINI_API_KEY no está configurada.')
   }
 
-  aiClient = new GoogleGenAI({ apiKey })
+  aiClient = new GoogleGenAI({
+    apiKey,
+    httpOptions: { timeout: 15000 },
+  })
   return aiClient
 }
 
@@ -31,6 +34,7 @@ const recipesResponseSchema = {
         properties: {
           nombre: { type: Type.STRING },
           descripcion: { type: Type.STRING },
+          tiempo: { type: Type.STRING },
           ingredientes: {
             type: Type.ARRAY,
             items: { type: Type.STRING },
@@ -41,6 +45,7 @@ const recipesResponseSchema = {
         required: [
           'nombre',
           'descripcion',
+          'tiempo',
           'ingredientes',
           'preparacion',
           'advertenciaIngredientes',
@@ -48,6 +53,7 @@ const recipesResponseSchema = {
         propertyOrdering: [
           'nombre',
           'descripcion',
+          'tiempo',
           'ingredientes',
           'preparacion',
           'advertenciaIngredientes',
@@ -77,7 +83,7 @@ const ingredientImageResponseSchema = {
 }
 
 function serializeHealthProfile(perfilSalud = {}) {
-  return JSON.stringify({
+  const profile = {
     tipoSibo: perfilSalud.tipoSibo || null,
     tipoSiboOtro: perfilSalud.tipoSiboOtro || null,
     faseProtocoloNutricional: perfilSalud.faseProtocoloNutricional || null,
@@ -91,25 +97,41 @@ function serializeHealthProfile(perfilSalud = {}) {
     preferenciaAlimentaria: perfilSalud.preferenciaAlimentaria || null,
     preferenciaAlimentariaOtra: perfilSalud.preferenciaAlimentariaOtra || null,
     ingredientesAEvitar: perfilSalud.ingredientesAEvitar || null,
-  })
+  }
+
+  const nonEmptyProfile = Object.fromEntries(
+    Object.entries(profile).filter(([, value]) => {
+      if (Array.isArray(value)) return value.length > 0
+      if (typeof value === 'string') return value.trim().length > 0
+      return value !== null && value !== undefined
+    }),
+  )
+
+  return JSON.stringify(nonEmptyProfile)
 }
 
 function parseJsonResponse(response) {
   const text = response?.text?.trim()
-  if (!text) throw new Error('Gemini devolvió una respuesta vacía.')
+  const finishReason = response?.candidates?.[0]?.finishReason || 'unknown'
+  if (!text) {
+    const error = new Error('Gemini devolvió una respuesta vacía.')
+    error.rawResponse = ''
+    error.finishReason = finishReason
+    throw error
+  }
 
   if (process.env.NODE_ENV !== 'production') {
     console.log('Gemini raw response:', JSON.stringify(text))
-    console.log(
-      'Gemini finish reason:',
-      response?.candidates?.[0]?.finishReason || 'unknown',
-    )
+    console.log('Gemini finish reason:', finishReason)
   }
 
   try {
     return JSON.parse(text)
   } catch {
-    throw new Error('Gemini devolvió una respuesta JSON inválida.')
+    const error = new Error('Gemini devolvió una respuesta JSON inválida.')
+    error.rawResponse = text
+    error.finishReason = finishReason
+    throw error
   }
 }
 
@@ -135,19 +157,38 @@ ${profile}
 Ingredientes disponibles o antojo del usuario:
 ${normalizedConsulta}
 
-Devolvé exactamente 3 ideas de recetas o comidas seguras para este perfil. Priorizá los ingredientes que pidió el usuario y respetá estrictamente su fase, condiciones, restricciones, alergias, preferencia alimentaria e ingredientes a evitar. Si algún ingrediente pedido no es apto o requiere cautela, no lo uses como ingrediente principal y explicalo brevemente en advertenciaIngredientes. Si todos son aptos, usá una cadena vacía en ese campo. No inventes diagnósticos ni afirmes seguridad médica absoluta. Respondé únicamente con el JSON solicitado.`,
+Devolvé exactamente 3 ideas de recetas o comidas seguras para este perfil. Priorizá los ingredientes que pidió el usuario y respetá estrictamente su fase, condiciones, restricciones, alergias, preferencia alimentaria e ingredientes a evitar. Si algún ingrediente pedido no es apto o requiere cautela, no lo uses como ingrediente principal y explicalo brevemente en advertenciaIngredientes. Si todos son aptos, usá una cadena vacía en ese campo. No inventes diagnósticos ni afirmes seguridad médica absoluta.
+
+Sé breve y directo:
+- nombre: máximo 60 caracteres;
+- descripción: máximo 160 caracteres;
+- tiempo: indicá el tiempo total aproximado, por ejemplo "20 minutos";
+- ingredientes: usá prioritariamente los ingredientes aportados por el usuario y únicamente los necesarios para la receta;
+- podés agregar como máximo 1 o 2 ingredientes complementarios si hacen falta para completar la preparación;
+- preparación: máximo 400 caracteres;
+- advertenciaIngredientes: máximo 160 caracteres.
+
+Si el usuario indicó ingredientes aptos, intentá incorporarlos como base de cada receta. No agregues ingredientes innecesarios ni fuerces un ingrediente que sea incompatible con el perfil de salud; en ese caso, explicalo brevemente en advertenciaIngredientes. No agregues explicaciones fuera del JSON y respetá exactamente el esquema solicitado.`,
           },
         ],
       },
     ],
     config: {
-      maxOutputTokens: 650,
+      maxOutputTokens: 1200,
       responseMimeType: JSON_MIME_TYPE,
       responseSchema: recipesResponseSchema,
     },
   })
 
-  return parseJsonResponse(response)
+  console.log('Gemini usage metadata:', response?.usageMetadata || null)
+
+  return {
+    result: parseJsonResponse(response),
+    debug: {
+      rawResponse: response?.text?.trim() || '',
+      finishReason: response?.candidates?.[0]?.finishReason || 'unknown',
+    },
+  }
 }
 
 export async function analizarIngredienteImagen({

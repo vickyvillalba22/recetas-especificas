@@ -15,8 +15,11 @@ const DAILY_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1000
 
 const requestsByUser = new Map()
 
-function jsonError(message, status) {
-  return Response.json({ error: message }, { status })
+function jsonError(message, status, debug) {
+  return Response.json(
+    { error: message, ...(debug ? { debug } : {}) },
+    { status },
+  )
 }
 
 function getBearerToken(request) {
@@ -168,7 +171,9 @@ export async function POST(request) {
   }
 
   try {
+    const profileStartTime = Date.now()
     const profileSnapshot = await getAdminDb().doc(`users/${user.uid}`).get()
+    const profileDurationMs = Date.now() - profileStartTime
     if (!profileSnapshot.exists) {
       return jsonError('No se encontró el perfil del usuario.', 404)
     }
@@ -182,11 +187,38 @@ export async function POST(request) {
     }
 
     if (body.type === 'recipes') {
-      const result = await recomendarRecetas({
-        consulta: body.consulta.trim(),
-        perfilSalud,
-      })
-      return Response.json({ result })
+      const geminiStartTime = Date.now()
+      try {
+        const recommendation = await recomendarRecetas({
+          consulta: body.consulta.trim(),
+          perfilSalud,
+        })
+        console.log('Qué puedo comer timings:', {
+          type: body.type,
+          profileDurationMs,
+          geminiDurationMs: Date.now() - geminiStartTime,
+          totalDurationMs: Date.now() - profileStartTime,
+        })
+        return Response.json({
+          result: recommendation.result,
+          debug: recommendation.debug,
+        })
+      } catch (error) {
+        console.error('Qué puedo comer Gemini timing:', {
+          type: body.type,
+          profileDurationMs,
+          geminiDurationMs: Date.now() - geminiStartTime,
+          totalDurationMs: Date.now() - profileStartTime,
+        })
+        return jsonError(
+          error.message || 'Gemini no pudo procesar la respuesta.',
+          502,
+          {
+            rawResponse: error.rawResponse || '',
+            finishReason: error.finishReason || 'unknown',
+          },
+        )
+      }
     }
 
     const result = await analizarIngredienteImagen({
