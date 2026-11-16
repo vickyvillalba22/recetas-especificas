@@ -15,7 +15,7 @@ function readTheme() {
   }
 }
 
-const protectedPaths = new Set(['/recetas', '/mis-recetas', '/recetas-favoritas', '/diario', '/que-puedo-comer', '/perfil', '/perfil/editar', '/perfil/configurar-cuenta', '/onboarding'])
+const protectedPaths = new Set(['/recetas', '/mis-recetas', '/recetas-favoritas', '/diario', '/que-puedo-comer', '/perfil', '/perfil/editar', '/perfil/configurar-cuenta', '/perfil/historia-clinica', '/onboarding'])
 
 function isAdminPath(pathname) {
   return pathname === '/admin' || pathname.startsWith('/admin/')
@@ -61,11 +61,12 @@ function AppShellContent({ children }) {
   const shouldShowApp = !protectedRoute || (user && !adminUnauthorized)
   const isAuthPage = pathname === '/login' || pathname === '/registro'
   const isOnboardingPage = pathname === '/onboarding'
+  const isWelcomePage = pathname === '/' && !user
   const showBottomNavigation = Boolean(user && !loading && !isAuthPage && !isOnboardingPage && shouldShowApp)
 
   return (
     <>
-      {!isOnboardingPage && (
+      {!isOnboardingPage && !isWelcomePage && (
         <Header
           theme={theme}
           onThemeToggle={toggleTheme}

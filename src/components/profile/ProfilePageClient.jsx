@@ -98,6 +98,16 @@ export function ProfilePageClient() {
               </span>
             </Link>
 
+            <Link href="/perfil/historia-clinica" className="flex items-center gap-4 rounded-2xl border border-moss/20 bg-sage/30 p-4 transition hover:border-moss/40 hover:bg-sage/50 dark:border-sage/20 dark:bg-moss/20 dark:hover:bg-moss/30">
+              <span className="grid h-11 w-11 place-items-center rounded-xl bg-white text-moss dark:bg-ink-soft dark:text-sage">
+                <BookHeart size={22} />
+              </span>
+              <span>
+                <strong className="block text-sm">Mi historia clínica</strong>
+                <span className="mt-1 block text-xs text-ink/55 dark:text-cream/55">Organizá tus turnos, estudios y seguimiento médico.</span>
+              </span>
+            </Link>
+
             {isAdmin && <Link href="/admin" className="flex items-center gap-4 rounded-2xl border border-moss/20 bg-sage/30 p-4 transition hover:border-moss/40 hover:bg-sage/50 dark:border-sage/20 dark:bg-moss/20 dark:hover:bg-moss/30">
               <span className="grid h-11 w-11 place-items-center rounded-xl bg-white text-moss dark:bg-ink-soft dark:text-sage">
                 <Settings size={22} />

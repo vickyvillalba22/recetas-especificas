@@ -7,6 +7,7 @@ function HugeIcon({ icon, size = 24, strokeWidth: _strokeWidth, ...props }) {
 export const BookHeart = (props) => <HugeIcon icon="book-02" {...props} />
 export const ArrowLeft = (props) => <HugeIcon icon="arrow-left-02" {...props} />
 export const Camera = (props) => <HugeIcon icon="camera-01" {...props} />
+export const Calendar = (props) => <HugeIcon icon="calendar-03" {...props} />
 export const Check = (props) => <HugeIcon icon="check" {...props} />
 export const CirclePlus = (props) => <HugeIcon icon="add-circle" {...props} />
 export const Clock3 = (props) => <HugeIcon icon="clock-01" {...props} />

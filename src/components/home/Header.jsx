@@ -12,6 +12,7 @@ const backLabels = {
   '/mis-recetas': 'Volver al perfil',
   '/recetas-favoritas': 'Volver al perfil',
   '/registro': 'Volver al inicio',
+  '/perfil/historia-clinica': 'Volver al perfil',
 }
 
 const knownPaths = new Set(['/', '/admin', '/admin/recetas', '/diario', '/login', '/mis-recetas', '/perfil', '/que-puedo-comer', '/recetas', '/recetas-favoritas', '/registro'])
