@@ -40,7 +40,7 @@ export function RecipeCard({
 
   return (
     <article
-      className={`flex rounded-2xl border border-ink/10 bg-cream dark:border-cream/10 dark:bg-ink h-72 ${usesMediaLayout ? 'flex-row gap-3 p-3' : 'flex-col p-5'}`}
+      className={`flex min-h-72 rounded-2xl border border-ink/10 bg-cream dark:border-cream/10 dark:bg-ink ${usesMediaLayout ? 'flex-row gap-3 p-3' : 'flex-col p-5'}`}
     >
       {usesMediaLayout && (
         <div className="relative h-full w-[38%] shrink-0 overflow-hidden rounded-xl">
@@ -90,7 +90,7 @@ export function RecipeCard({
             ))}
           </div>
         )}
-        <div className="flex flex-wrap justify-end gap-2 pt-11">
+        <div className="mt-auto flex flex-wrap justify-end gap-2">
           <button
             type="button"
             onClick={() => onAddToMenu(recipe)}

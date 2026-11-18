@@ -38,8 +38,8 @@ export function BottomNavigation() {
   }, [activeIndex])
 
   return (
-    <nav aria-label="Navegación principal" className="sticky bottom-6 z-40 mx-5 mb-3 rounded-full border border-ink/10 bg-white p-1 shadow-soft dark:border-sage/70 dark:bg-sage md:hidden">
-      <div ref={navigationRef} className="relative mx-auto grid grid-cols-5 pb-[env(safe-area-inset-bottom)]">
+    <nav aria-label="Navegación principal" className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] left-5 right-5 z-40 rounded-full border border-ink/10 bg-white p-1 shadow-soft dark:border-sage/70 dark:bg-sage md:hidden">
+      <div ref={navigationRef} className="relative mx-auto grid grid-cols-5">
         <span
           aria-hidden="true"
           className={`pointer-events-none absolute top-[-10px] z-0 h-12 w-12 -translate-x-1/2 rounded-full bg-coral shadow-md shadow-coral/30 transition-[left,opacity] duration-300 ease-linear dark:border-sage ${
