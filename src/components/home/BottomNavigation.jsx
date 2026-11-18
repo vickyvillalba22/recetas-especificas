@@ -55,7 +55,7 @@ export function BottomNavigation() {
               key={href}
               href={href}
               aria-current={active ? 'page' : undefined}
-              className={`relative z-10 flex h-12 items-center justify-center px-1 text-[10px] font-bold transition-transform duration-300 ease-linear ${active ? '-translate-y-2 text-white' : 'text-ink/45 hover:text-ink/75 dark:text-ink/55 dark:hover:text-ink'}`}
+              className={`relative z-10 flex h-12 items-center justify-center px-1 text-[10px] font-bold transition-transform duration-300 ease-linear ${active ? '-translate-y-[9px] text-white' : 'text-ink/45 hover:text-ink/75 dark:text-ink/55 dark:hover:text-ink'}`}
             >
               <span className="grid h-9 w-12 place-items-center rounded-full">
                 <Icon size={25} />
