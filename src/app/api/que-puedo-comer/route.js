@@ -7,7 +7,8 @@ import {
 export const runtime = 'nodejs'
 
 const MAX_TEXT_LENGTH = 250
-const MAX_IMAGE_BYTES = 300 * 1024
+const MAX_IMAGE_BYTES = 200 * 1024
+const SUPPORTED_IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 const RATE_LIMIT_MAX_REQUESTS = 5
 const RATE_LIMIT_WINDOW_MS = 60 * 1000
 const DAILY_LIMIT_MAX_REQUESTS = 30
@@ -15,9 +16,9 @@ const DAILY_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1000
 
 const requestsByUser = new Map()
 
-function jsonError(message, status, debug) {
+function jsonError(message, status, code, debug) {
   return Response.json(
-    { error: message, ...(debug ? { debug } : {}) },
+    { error: message, ...(code ? { code } : {}), ...(debug ? { debug } : {}) },
     { status },
   )
 }
@@ -82,7 +83,7 @@ function normalizeImagePayload(imageBase64) {
 }
 
 function isSupportedImageMimeType(mimeType) {
-  return ['image/jpeg', 'image/png', 'image/webp'].includes(mimeType)
+  return SUPPORTED_IMAGE_MIME_TYPES.includes(mimeType)
 }
 
 function isValidBase64(value) {
@@ -94,23 +95,42 @@ function isValidBase64(value) {
   )
 }
 
+function getDecodedBase64Bytes(value) {
+  const padding = value.endsWith('==') ? 2 : value.endsWith('=') ? 1 : 0
+  return Math.floor((value.length * 3) / 4) - padding
+}
+
+function isGeminiUnavailableError(error) {
+  const status = error?.status || error?.code
+  const message = String(error?.message || '').toLowerCase()
+
+  return (
+    status === 503 ||
+    status === '503' ||
+    message.includes('unavailable') ||
+    message.includes('high demand')
+  )
+}
+
 export async function POST(request) {
   const user = await getAuthenticatedUser(request)
-  if (!user) return jsonError('No autorizado.', 401)
+  if (!user) {
+    return jsonError('La sesión venció o no es válida.', 401, 'SESSION_EXPIRED')
+  }
 
   let body
   try {
     body = await request.json()
   } catch {
-    return jsonError('El cuerpo de la solicitud no es un JSON válido.', 400)
+    return jsonError('El cuerpo de la solicitud no es un JSON válido.', 400, 'INVALID_REQUEST')
   }
 
   if (!body || typeof body !== 'object') {
-    return jsonError('La solicitud es inválida.', 400)
+    return jsonError('La solicitud es inválida.', 400, 'INVALID_REQUEST')
   }
 
   if (!['recipes', 'image'].includes(body.type)) {
-    return jsonError('El tipo de consulta no es válido.', 400)
+    return jsonError('El tipo de consulta no es válido.', 400, 'INVALID_REQUEST')
   }
 
   let imagePayload
@@ -133,40 +153,43 @@ export async function POST(request) {
   } else {
     imagePayload = normalizeImagePayload(body.imageBase64)
     if (!imagePayload?.data) {
-      return jsonError('La imagen es obligatoria.', 400)
+      return jsonError('La imagen es obligatoria.', 400, 'INVALID_IMAGE')
     }
 
     const effectiveMimeType =
       imagePayload.mimeType || body.mimeType || 'image/jpeg'
     if (!isSupportedImageMimeType(effectiveMimeType)) {
-      return jsonError('El formato de imagen no es compatible.', 415)
+      return jsonError('El formato de imagen no es compatible.', 415, 'INVALID_IMAGE')
     }
 
     if (!isValidBase64(imagePayload.data)) {
-      return jsonError('La imagen Base64 no es válida.', 400)
+      return jsonError('La imagen Base64 no es válida.', 400, 'INVALID_IMAGE')
     }
 
-    const imageBase64Bytes = Buffer.byteLength(imagePayload.data, 'utf8')
-    if (
-      !Number.isFinite(imageBase64Bytes) ||
-      imageBase64Bytes > MAX_IMAGE_BYTES
-    ) {
-      return jsonError('La imagen supera el límite permitido de 300 KB.', 413)
+    const imageBytes = getDecodedBase64Bytes(imagePayload.data)
+    if (!Number.isFinite(imageBytes) || imageBytes > MAX_IMAGE_BYTES) {
+      return jsonError(
+        'La imagen supera el límite permitido de 200 KB.',
+        413,
+        'INVALID_IMAGE',
+      )
     }
   }
 
   const rateLimitType = isRateLimited(user.uid)
   if (rateLimitType === 'daily') {
-    return jsonError(
-      'Alcanzaste el límite de 30 consultas diarias. Intentá nuevamente mañana.',
-      429,
-    )
+      return jsonError(
+        'Alcanzaste el límite de 30 consultas diarias. Intentá nuevamente mañana.',
+        429,
+        'RATE_LIMIT',
+      )
   }
 
   if (rateLimitType === 'minute') {
     return jsonError(
       'Alcanzaste el límite de 5 consultas por minuto. Intentá nuevamente en unos segundos.',
       429,
+      'RATE_LIMIT',
     )
   }
 
@@ -179,7 +202,11 @@ export async function POST(request) {
     }
 
     const perfilSalud = profileSnapshot.data()?.perfilSalud
-    if (!perfilSalud || typeof perfilSalud !== 'object') {
+    if (
+      !perfilSalud ||
+      typeof perfilSalud !== 'object' ||
+      Array.isArray(perfilSalud)
+    ) {
       return jsonError(
         'Todavía no hay un perfil de salud configurado. Completá el onboarding.',
         400,
@@ -210,10 +237,11 @@ export async function POST(request) {
           geminiDurationMs: Date.now() - geminiStartTime,
           totalDurationMs: Date.now() - profileStartTime,
         })
-        return jsonError(
-          error.message || 'Gemini no pudo procesar la respuesta.',
-          502,
-          {
+         return jsonError(
+           error.message || 'Gemini no pudo procesar la respuesta.',
+           502,
+           isGeminiUnavailableError(error) ? 'GEMINI_UNAVAILABLE' : 'AI_ERROR',
+           {
             rawResponse: error.rawResponse || '',
             finishReason: error.finishReason || 'unknown',
           },
@@ -221,18 +249,26 @@ export async function POST(request) {
       }
     }
 
-    const result = await analizarIngredienteImagen({
-      imageBase64: imagePayload.data,
-      mimeType:
-        imagePayload.mimeType || body.mimeType || 'image/jpeg',
-      perfilSalud,
-    })
-    return Response.json({ result })
+    try {
+      const result = await analizarIngredienteImagen({
+        imageBase64: imagePayload.data,
+        mimeType:
+          imagePayload.mimeType || body.mimeType || 'image/jpeg',
+        perfilSalud,
+      })
+      return Response.json({ result })
+    } catch (error) {
+      console.error('Qué puedo comer image analysis error:', error)
+      return jsonError(
+        isGeminiUnavailableError(error)
+          ? 'El servicio de análisis está temporalmente ocupado.'
+          : 'No pudimos analizar la imagen.',
+        isGeminiUnavailableError(error) ? 503 : 502,
+        isGeminiUnavailableError(error) ? 'GEMINI_UNAVAILABLE' : 'AI_ERROR',
+      )
+    }
   } catch (error) {
     console.error('Qué puedo comer API error:', error)
-    return jsonError(
-      'No pudimos procesar la consulta. Intentá nuevamente más tarde.',
-      500,
-    )
+    return jsonError('Ocurrió un error inesperado. Intentá nuevamente más tarde.', 500, 'INTERNAL_ERROR')
   }
 }

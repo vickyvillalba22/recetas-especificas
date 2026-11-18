@@ -69,14 +69,18 @@ const ingredientImageResponseSchema = {
   type: Type.OBJECT,
   properties: {
     ingredienteDetectado: { type: Type.STRING },
-    esApto: { type: Type.BOOLEAN },
+    estado: {
+      type: Type.STRING,
+      description:
+        'Usá exactamente uno de estos valores: apto, no_apto o no_identificado.',
+    },
     veredicto: { type: Type.STRING },
     alternativa: { type: Type.STRING },
   },
-  required: ['ingredienteDetectado', 'esApto', 'veredicto', 'alternativa'],
+  required: ['ingredienteDetectado', 'estado', 'veredicto', 'alternativa'],
   propertyOrdering: [
     'ingredienteDetectado',
-    'esApto',
+    'estado',
     'veredicto',
     'alternativa',
   ],
@@ -208,17 +212,23 @@ export async function analizarIngredienteImagen({
         role: 'user',
         parts: [
           {
-            text: `Analizá la imagen para identificar el ingrediente o alimento principal visible y evaluarlo según el perfil de salud del usuario.
+           text: `Analizá la imagen para identificar únicamente el alimento o ingrediente principal visible y evaluarlo según el perfil de salud del usuario.
 
 Perfil de salud del usuario, en JSON:
 ${profile}
 
 Indicaciones:
-- Si no podés identificar un ingrediente con suficiente confianza, indicá "No identificado" y explicalo brevemente.
-- Determiná si puede comerlo según tipo de SIBO, fase, condiciones digestivas, restricciones, alergias, preferencia e ingredientes a evitar.
+- Identificá solo el alimento o ingrediente principal que se vea con mayor claridad. No listes ni evalúes todos los elementos de la imagen.
+- Si aparecen varios alimentos, elegí únicamente el principal o más visible. Si no podés elegir uno con suficiente confianza, usá estado "no_identificado".
+- Si aparece un plato preparado, evaluá solo lo que pueda identificarse visualmente y no supongas ingredientes ocultos, salsas, rellenos o métodos de cocción que no se vean.
+- Si aparece un envase, no inventes ingredientes ni información nutricional. Usá únicamente lo que sea visible y, si no alcanza para identificar el alimento con seguridad, usá estado "no_identificado".
+- Si la imagen está borrosa, cortada, demasiado oscura o no muestra comida, usá estado "no_identificado", indicá "No identificado" en ingredienteDetectado y explicalo brevemente en veredicto.
+- Si identificás el alimento principal con suficiente confianza, usá estado "apto" o "no_apto" según estrictamente el tipo de SIBO, fase, condiciones digestivas, restricciones, alergias, preferencia e ingredientes a evitar del perfil.
 - El campo veredicto debe tener como máximo 2 oraciones, ser claro y prudente.
-- Si no es apto, incluí una alternativa concreta; si es apto, usá una cadena vacía.
-- No reemplaces la indicación de un profesional de la salud.
+- Si el estado es "no_apto", incluí una alternativa concreta; si el estado es "apto" o "no_identificado", usá una cadena vacía en alternativa.
+- estado debe ser exactamente uno de estos valores: "apto", "no_apto" o "no_identificado".
+- No afirmes seguridad médica absoluta ni reemplaces la indicación de un profesional de la salud.
+- Si el perfil no contiene información suficiente para evaluar el alimento, expresalo con prudencia en veredicto y evitá conclusiones categóricas.
 - Respondé únicamente con el JSON solicitado.`,
           },
           {
@@ -232,7 +242,6 @@ Indicaciones:
     ],
     config: {
       maxOutputTokens: 150,
-      thinkingConfig: { thinkingBudget: 0 },
       responseMimeType: JSON_MIME_TYPE,
       responseSchema: ingredientImageResponseSchema,
     },

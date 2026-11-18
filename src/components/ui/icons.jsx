@@ -13,6 +13,7 @@ export const CirclePlus = (props) => <HugeIcon icon="add-circle" {...props} />
 export const Clock3 = (props) => <HugeIcon icon="clock-01" {...props} />
 export const Copy = (props) => <HugeIcon icon="copy-01" {...props} />
 export const Download = (props) => <HugeIcon icon="download-04" {...props} />
+export const FileUpload = (props) => <HugeIcon icon="file-upload" {...props} />
 export const Filter = (props) => <HugeIcon icon="filter" {...props} />
 export const Home = (props) => <HugeIcon icon="home-01" {...props} />
 export const Info = (props) => <HugeIcon icon="information-circle" {...props} />
