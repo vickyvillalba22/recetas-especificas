@@ -1,19 +1,19 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { RecipeFormModal } from '../../../components/recipes/RecipeFormModal'
 import { RecipeGallery } from '../../../components/recipes/RecipeGallery'
 import { createPublicRecipe, deletePublicRecipe, getAllPublicRecipes, updatePublicRecipe } from '../../../services/recipes/publicRecipesService'
+import { useRecipeMenuFlow } from '../../../hooks/useRecipeMenuFlow'
 
 export function AdminRecipes() {
-  const router = useRouter()
   const [recipes, setRecipes] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [formRecipe, setFormRecipe] = useState(null)
   const [formLoading, setFormLoading] = useState(false)
   const [formError, setFormError] = useState('')
+  const { openAddRecipe, modals: recipeMenuModals } = useRecipeMenuFlow()
 
   useEffect(() => {
     let active = true
@@ -71,9 +71,8 @@ export function AdminRecipes() {
   }
 
   function addToMenu(recipe) {
-    sessionStorage.setItem('sibo-recipe-to-add', JSON.stringify(recipe))
-    router.push('/?addRecipe=1')
+    openAddRecipe(recipe)
   }
 
-  return <div className="min-h-screen bg-cream text-ink dark:bg-ink-dark dark:text-cream"><main className="mx-auto max-w-[1440px] px-5 pb-20 pt-10 lg:px-10 lg:pt-16"><RecipeGallery mode="admin" recipes={recipes} loading={loading} error={error} onAddRecipe={() => openForm()} onEditRecipe={openForm} onDeleteRecipe={removeRecipe} onAddToMenu={addToMenu} /></main>{formRecipe && <RecipeFormModal recipe={formRecipe} onClose={closeForm} onSubmit={saveRecipe} loading={formLoading} error={formError} />}</div>
+  return <div className="min-h-screen bg-cream text-ink dark:bg-ink-dark dark:text-cream"><main className="mx-auto max-w-[1440px] px-5 pb-20 pt-10 lg:px-10 lg:pt-16"><RecipeGallery mode="admin" recipes={recipes} loading={loading} error={error} onAddRecipe={() => openForm()} onEditRecipe={openForm} onDeleteRecipe={removeRecipe} onAddToMenu={addToMenu} /></main>{formRecipe && <RecipeFormModal recipe={formRecipe} onClose={closeForm} onSubmit={saveRecipe} loading={formLoading} error={formError} />}{recipeMenuModals}</div>
 }

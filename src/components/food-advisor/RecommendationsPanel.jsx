@@ -1,16 +1,16 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { useAuth } from '../../context/AuthContext'
 import { saveFavoriteRecipe } from '../../services/recipes/favoriteRecipesService'
+import { useRecipeMenuFlow } from '../../hooks/useRecipeMenuFlow'
 import { CirclePlus, Star } from '../ui/icons'
 
 const MAX_CACHE_ENTRIES = 10
 
 export function RecommendationsPanel() {
   const { user } = useAuth()
-  const router = useRouter()
+  const { openAddRecipe, modals: recipeMenuModals } = useRecipeMenuFlow()
   const [foodQuery, setFoodQuery] = useState('')
   const [result, setResult] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -86,8 +86,7 @@ export function RecommendationsPanel() {
   }
 
   function addGeneratedRecipeToMenu(recipe) {
-    sessionStorage.setItem('sibo-recipe-to-add', JSON.stringify(recipe))
-    router.push('/?addRecipe=1')
+    openAddRecipe(recipe)
   }
 
   async function requestRecommendations(event) {
@@ -184,7 +183,8 @@ export function RecommendationsPanel() {
   }
 
   return (
-    <form className="mt-6" onSubmit={requestRecommendations}>
+    <>
+      <form className="mt-6" onSubmit={requestRecommendations}>
       <label htmlFor="food-query" className="text-sm font-bold">
         ¿Qué tenés o qué te gustaría comer?
       </label>
@@ -325,6 +325,8 @@ export function RecommendationsPanel() {
           No encontramos recomendaciones para mostrar. Probá con otros ingredientes.
         </p>
       )}
-    </form>
+      </form>
+      {recipeMenuModals}
+    </>
   )
 }

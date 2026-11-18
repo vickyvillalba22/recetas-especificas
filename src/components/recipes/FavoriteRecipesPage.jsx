@@ -1,14 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { RecipeGallery } from './RecipeGallery'
 import { RecipeDetailsModal } from './RecipeDetailsModal'
 import { RemoveFavoriteModal } from './RemoveFavoriteModal'
 import { deleteFavoriteRecipe, getFavoriteRecipes } from '../../services/recipes/favoriteRecipesService'
+import { useRecipeMenuFlow } from '../../hooks/useRecipeMenuFlow'
 
 export function FavoriteRecipesPage() {
-  const router = useRouter()
   const [recipes, setRecipes] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -16,6 +15,7 @@ export function FavoriteRecipesPage() {
   const [removeLoading, setRemoveLoading] = useState(false)
   const [removeError, setRemoveError] = useState('')
   const [detailsRecipe, setDetailsRecipe] = useState(null)
+  const { openAddRecipe, modals: recipeMenuModals } = useRecipeMenuFlow()
 
   useEffect(() => {
     let active = true
@@ -36,8 +36,8 @@ export function FavoriteRecipesPage() {
   }, [])
 
   function addToMenu(recipe) {
-    sessionStorage.setItem('sibo-recipe-to-add', JSON.stringify(recipe))
-    router.push('/?addRecipe=1')
+    setDetailsRecipe(null)
+    openAddRecipe(recipe)
   }
 
   function requestRemoveFavorite(recipe) {
@@ -95,6 +95,7 @@ export function FavoriteRecipesPage() {
           favoriteSaving={false}
         />
       )}
+      {recipeMenuModals}
     </div>
   )
 }

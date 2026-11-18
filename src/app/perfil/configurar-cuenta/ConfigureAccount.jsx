@@ -1,12 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { getAuthErrorMessage, useAuth } from '../../../context/AuthContext'
+import { useTheme } from '../../../context/ThemeContext'
 import { updateAccountName, updateAccountPassword } from '../../../services/accountService'
+import { Moon, Sun } from '../../../components/ui/icons'
 
 export function ConfigureAccount() {
   const { user, profile, loading: authLoading, refreshProfile } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const [displayName, setDisplayName] = useState(profile?.displayName || user?.displayName || '')
   const [password, setPassword] = useState('')
   const [passwordConfirmation, setPasswordConfirmation] = useState('')
@@ -84,6 +86,29 @@ export function ConfigureAccount() {
         <p className="mt-2 text-sm text-ink/60 dark:text-cream/60">
           Desde acá podés actualizar tus datos de acceso. El email no se puede modificar.
         </p>
+
+        <section className="mt-8 rounded-3xl border border-ink/10 bg-white p-6 shadow-soft dark:border-cream/10 dark:bg-ink-soft dark:shadow-soft-dark sm:p-10">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="font-display text-2xl">Apariencia</h2>
+              <p className="mt-2 text-sm text-ink/60 dark:text-cream/60">
+                Elegí cómo querés ver la aplicación.
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={theme === 'dark'}
+              aria-label={theme === 'dark' ? 'Desactivar modo oscuro' : 'Activar modo oscuro'}
+              onClick={toggleTheme}
+              className={`relative grid h-11 w-[4.5rem] shrink-0 place-items-center rounded-full border transition ${theme === 'dark' ? 'border-moss bg-moss text-white' : 'border-ink/15 bg-cream text-ink/60 dark:border-cream/15 dark:bg-ink dark:text-cream/70'}`}
+            >
+              <span className={`absolute left-1 grid h-8 w-8 place-items-center rounded-full bg-white shadow-sm transition-transform ${theme === 'dark' ? 'translate-x-8 text-moss' : 'translate-x-0 text-ink/60'}`}>
+                {theme === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
+              </span>
+            </button>
+          </div>
+        </section>
 
         <section className="mt-8 rounded-3xl border border-ink/10 bg-white p-6 shadow-soft dark:border-cream/10 dark:bg-ink-soft dark:shadow-soft-dark sm:p-10">
           <label className="block text-sm font-bold">

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { BookHeart, Check, CirclePlus, Filter } from "../ui/icons";
+import { BookHeart, Check, CirclePlus, Filter, Search } from "../ui/icons";
 import { RecipeCard } from "./RecipeCard";
 
 export function RecipeGallery({
@@ -23,7 +23,10 @@ export function RecipeGallery({
 }) {
   const [filterOpen, setFilterOpen] = useState(false);
   const [fodmapOnly, setFodmapOnly] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const filterRef = useRef(null);
+  const searchInputRef = useRef(null);
   const isPublic = mode === "public";
   const isAdmin = mode === "admin";
   const isFavorites = mode === "favorites";
@@ -64,13 +67,31 @@ export function RecipeGallery({
       : isFavorites
         ? "Volvé a encontrar las recetas generales que guardaste."
         : "Guardá tus recetas personales para volver a encontrarlas al organizar tu semana.";
-  const visibleRecipes = fodmapOnly
-    ? recipes.filter((recipe) => formatTags(recipe.tags).some((tag) => tag.toLocaleLowerCase() === "bajo en fodmap"))
-    : recipes;
-
   function formatTags(values) {
     return Array.isArray(values) ? values.map((tag) => String(tag).trim()) : [];
   }
+
+  const visibleRecipes = recipes.filter((recipe) => {
+    const matchesFodmap =
+      !fodmapOnly ||
+      formatTags(recipe.tags).some(
+        (tag) => tag.toLocaleLowerCase() === "bajo en fodmap",
+      );
+    const normalizedSearch = searchTerm.trim().toLocaleLowerCase();
+    const searchableText = [
+      recipe.name,
+      recipe.description,
+      ...formatTags(recipe.tags),
+      ...(Array.isArray(recipe.ingredients) ? recipe.ingredients : []),
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLocaleLowerCase();
+    const matchesSearch =
+      !normalizedSearch || searchableText.includes(normalizedSearch);
+
+    return matchesFodmap && matchesSearch;
+  });
 
   useEffect(() => {
     if (!filterOpen) return undefined;
@@ -89,6 +110,10 @@ export function RecipeGallery({
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [filterOpen]);
+
+  useEffect(() => {
+    if (searchOpen) searchInputRef.current?.focus();
+  }, [searchOpen]);
 
   return (
     <section
@@ -116,6 +141,39 @@ export function RecipeGallery({
               <Link href="/recetas-favoritas" className="rounded-full border border-sun/50 px-4 py-2.5 text-xs font-bold text-ink transition hover:bg-sun/20 dark:text-cream">
                 Ver mis favoritos
               </Link>
+              <div className="flex items-center gap-2">
+                {searchOpen && (
+                  <input
+                    ref={searchInputRef}
+                    type="search"
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Escape") {
+                        setSearchTerm("");
+                        setSearchOpen(false);
+                      }
+                    }}
+                    placeholder="Buscar recetas..."
+                    aria-label="Buscar recetas"
+                    className="h-10 w-48 rounded-full border border-moss/30 bg-white px-4 text-sm outline-none transition placeholder:text-ink/35 focus:border-moss focus:ring-2 focus:ring-moss/15 dark:border-sage/30 dark:bg-ink-soft dark:placeholder:text-cream/35"
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={() => setSearchOpen((current) => !current)}
+                  className={`grid h-10 w-10 place-items-center rounded-full border transition ${
+                    searchOpen || searchTerm
+                      ? "border-moss bg-sage text-moss dark:border-sage dark:bg-moss/30 dark:text-sage"
+                      : "border-ink/15 text-ink/60 hover:bg-sage hover:text-moss dark:border-cream/15 dark:text-cream/70 dark:hover:bg-moss/30"
+                  }`}
+                  aria-label={searchOpen ? "Cerrar búsqueda" : "Buscar recetas"}
+                  aria-expanded={searchOpen}
+                  title={searchOpen ? "Cerrar búsqueda" : "Buscar recetas"}
+                >
+                  <Search size={18} />
+                </button>
+              </div>
               <div ref={filterRef} className="relative">
                 <button
                   type="button"
@@ -178,13 +236,19 @@ export function RecipeGallery({
               size={26}
             />
             <p className="text-sm font-semibold text-ink/60 dark:text-cream/60">
-              {fodmapOnly ? "No hay recetas con este filtro" : "Todavía no hay recetas"}
+              {searchTerm
+                ? "No encontramos recetas"
+                : fodmapOnly
+                  ? "No hay recetas con este filtro"
+                  : "Todavía no hay recetas"}
             </p>
             <p className="mt-1 text-xs text-ink/40 dark:text-cream/40">
-              {isPublic
-                ? fodmapOnly
-                  ? "Probá quitar el filtro para ver todas las recetas."
-                  : "Las recetas generales aparecerán aquí."
+                {isPublic
+                  ? searchTerm
+                    ? "Probá con otro término de búsqueda."
+                    : fodmapOnly
+                      ? "Probá quitar el filtro para ver todas las recetas."
+                      : "Las recetas generales aparecerán aquí."
                 : isFavorites
                   ? "Las recetas que guardes aparecerán aquí."
                   : "Agregá tu primera receta para verla aquí."}

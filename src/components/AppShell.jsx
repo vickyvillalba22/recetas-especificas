@@ -1,19 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { AuthProvider, useAuth } from '../context/AuthContext'
+import { ThemeProvider } from '../context/ThemeContext'
 import { BottomNavigation } from './home/BottomNavigation'
 import { Header } from './home/Header'
 import { LoadingScreen } from './ui/LoadingScreen'
-
-function readTheme() {
-  try {
-    return localStorage.getItem('sibo-theme') || 'light'
-  } catch {
-    return 'light'
-  }
-}
 
 const protectedPaths = new Set(['/recetas', '/mis-recetas', '/recetas-favoritas', '/diario', '/que-puedo-comer', '/perfil', '/perfil/editar', '/perfil/configurar-cuenta', '/perfil/historia-clinica', '/onboarding'])
 
@@ -25,14 +18,6 @@ function AppShellContent({ children }) {
   const router = useRouter()
   const pathname = usePathname()
   const { user, loading, isAdmin } = useAuth()
-  const [theme, setTheme] = useState(readTheme)
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark')
-    try {
-      localStorage.setItem('sibo-theme', theme)
-    } catch {}
-  }, [theme])
 
   useEffect(() => {
     if (!loading && !user && (protectedPaths.has(pathname) || isAdminPath(pathname))) router.replace('/')
@@ -54,8 +39,6 @@ function AppShellContent({ children }) {
     return () => window.cancelAnimationFrame(frame)
   }, [pathname])
 
-  const toggleTheme = () => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))
-
   const protectedRoute = protectedPaths.has(pathname) || isAdminPath(pathname)
   const adminUnauthorized = isAdminPath(pathname) && user && !isAdmin
   const shouldShowApp = !protectedRoute || (user && !adminUnauthorized)
@@ -68,10 +51,7 @@ function AppShellContent({ children }) {
     <>
       {!isOnboardingPage && !isWelcomePage && (
         <Header
-          theme={theme}
-          onThemeToggle={toggleTheme}
           user={user}
-          isAdmin={isAdmin}
         />
       )}
       {loading && protectedRoute ? <LoadingScreen /> : shouldShowApp ? children : null}
@@ -81,5 +61,5 @@ function AppShellContent({ children }) {
 }
 
 export function AppShell({ children }) {
-  return <AuthProvider><AppShellContent>{children}</AppShellContent></AuthProvider>
+  return <AuthProvider><ThemeProvider><AppShellContent>{children}</AppShellContent></ThemeProvider></AuthProvider>
 }

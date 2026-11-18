@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { DndContext, DragOverlay, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core'
-import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '../context/AuthContext'
 import { Footer } from '../components/home/Footer'
 import { HeroSection } from '../components/home/HeroSection'
@@ -35,8 +34,6 @@ import {
 } from '../utils/weeklyMenuUtils'
 
 export function HomePage() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
   const { user, loading: authLoading } = useAuth()
   const [menu, setMenu] = useState(initialMenu)
   const [weekStart, setWeekStart] = useState(() => getMonday(new Date()))
@@ -52,13 +49,6 @@ export function HomePage() {
   const [mealMoveSaving, setMealMoveSaving] = useState(false)
   const weeklyMenuRef = useRef(null)
   const [weeklyMenuHeight, setWeeklyMenuHeight] = useState(null)
-  const [theme, setTheme] = useState(() => {
-    try {
-      return localStorage.getItem('sibo-theme') || 'light'
-    } catch {
-      return 'light'
-    }
-  })
   const {
     shoppingItems,
     checked,
@@ -131,25 +121,6 @@ export function HomePage() {
     setMenu(nextTargetMenu)
   }
 
-  useEffect(() => {
-    if (!searchParams.get('addRecipe')) return
-    let recipeToAdd = null
-    try {
-      recipeToAdd = JSON.parse(sessionStorage.getItem('sibo-recipe-to-add') || 'null')
-      sessionStorage.removeItem('sibo-recipe-to-add')
-    } catch {}
-    if (!recipeToAdd) {
-      router.replace('/', { scroll: false })
-      return
-    }
-    setMealTarget({
-      date: formatDateKey(new Date()),
-      meal: 'Cena',
-      recipe: recipeToAdd,
-    })
-    router.replace('/', { scroll: false })
-  }, [router, searchParams])
-
   const openMealModal = (target) => {
     const targetDayIndex = weekdays.indexOf(target.day)
     const date = target.date || (targetDayIndex >= 0
@@ -206,13 +177,6 @@ export function HomePage() {
     setPendingCrossWeek(null)
     completeCrossWeekMove({ source, dropTarget })
   }, [dragOrigin, menuLoading, pendingCrossWeek])
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark')
-    try {
-      localStorage.setItem('sibo-theme', theme)
-    } catch {}
-  }, [theme])
 
   const persistMeal = async ({ day, meal, date, name, ingredients }) => {
     const currentMeal = mealTarget?.editing ? mealTarget.recipe : null

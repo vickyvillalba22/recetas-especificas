@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useRecipeMenuFlow } from "../../hooks/useRecipeMenuFlow";
 import { RecipeFormModal } from "./RecipeFormModal";
 import { RecipeGallery } from "./RecipeGallery";
 import { RecipeDetailsModal } from "./RecipeDetailsModal";
@@ -42,6 +43,7 @@ export function RecipesPageClient({ mode = "public" }) {
   const [formRecipe, setFormRecipe] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState("");
+  const { openAddRecipe, modals: recipeMenuModals } = useRecipeMenuFlow();
 
   useEffect(() => {
     let active = true;
@@ -199,8 +201,8 @@ export function RecipesPageClient({ mode = "public" }) {
   }
 
   function addToMenu(recipe) {
-    sessionStorage.setItem("sibo-recipe-to-add", JSON.stringify(recipe));
-    router.push("/?addRecipe=1");
+    setDetailsRecipe(null);
+    openAddRecipe(recipe);
   }
 
   return (
@@ -252,6 +254,7 @@ export function RecipesPageClient({ mode = "public" }) {
           favoriteSaving={favoriteSavingId === detailsRecipe.id}
         />
       )}
+      {recipeMenuModals}
     </div>
   );
 }

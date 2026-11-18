@@ -1,4 +1,4 @@
-import { CirclePlus, Clock3, Info, Star, X } from '../ui/icons'
+import { BookHeart, CirclePlus, Clock3, Info, Sparkles, Star, X } from '../ui/icons'
 
 export function RecipeCard({
   recipe,
@@ -14,7 +14,8 @@ export function RecipeCard({
   onDeleteRecipe,
   onEditRecipe,
 }) {
-  const hasImageCard = (isPublic || isFavorites) && recipe.imageUrl
+  const usesMediaLayout = isFavorites || (isPublic && recipe.imageUrl)
+  const isAiRecipe = recipe.origin === 'gemini'
   const canFavorite = (isPublic || isFavorites) && onToggleFavorite
   const isFavorite = favoriteRecipeIds.has(recipe.id)
 
@@ -39,15 +40,21 @@ export function RecipeCard({
 
   return (
     <article
-      className={`flex rounded-2xl border border-ink/10 bg-cream dark:border-cream/10 dark:bg-ink h-72 ${hasImageCard ? 'flex-row gap-3 p-3' : 'flex-col p-5'}`}
+      className={`flex rounded-2xl border border-ink/10 bg-cream dark:border-cream/10 dark:bg-ink h-72 ${usesMediaLayout ? 'flex-row gap-3 p-3' : 'flex-col p-5'}`}
     >
-      {hasImageCard && (
+      {usesMediaLayout && (
         <div className="relative h-full w-[38%] shrink-0 overflow-hidden rounded-xl">
-          <img src={recipe.imageUrl} alt={recipe.name} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+          {recipe.imageUrl ? (
+            <img src={recipe.imageUrl} alt={recipe.name} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+          ) : (
+            <div className="grid h-full w-full place-items-center bg-sage/60 text-moss dark:bg-moss/25 dark:text-sage">
+              {isAiRecipe ? <Sparkles size={42} /> : <BookHeart size={42} />}
+            </div>
+          )}
           {renderFavoriteButton(true)}
         </div>
       )}
-      <div className={`flex min-w-0 flex-1 flex-col ${hasImageCard ? 'p-2' : ''}`}>
+      <div className={`flex min-w-0 flex-1 flex-col ${usesMediaLayout ? 'p-2' : ''}`}>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h3 className="font-display font-semibold text-[18px] text-moss dark:text-sage">{recipe.name}</h3>
@@ -58,7 +65,7 @@ export function RecipeCard({
             )}
           </div>
           <div className="flex shrink-0 items-center gap-1">
-            {!hasImageCard && renderFavoriteButton()}
+            {!usesMediaLayout && renderFavoriteButton()}
             {canManage && onDeleteRecipe && (
               <button
                 type="button"
