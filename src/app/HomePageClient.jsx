@@ -13,8 +13,8 @@ import { ClearListModal } from '../components/home/modals/ClearListModal'
 import { DeleteMealModal } from '../components/home/modals/DeleteMealModal'
 import { MealModal } from '../components/home/modals/MealModal'
 import { CROSS_WEEK_DRAG_ENABLED, mealTimes } from '../components/home/weeklyMenuConstants'
-import { getShoppingList, saveShoppingList } from '../services/shoppingListService'
-import { createMeal, deleteMeal, getWeeklyMenu, moveOrSwapMeals, updateMeal } from '../services/weeklyMenuService'
+import { getShoppingList, saveShoppingList } from '../services/home/shoppingListService'
+import { createMeal, deleteMeal, getWeeklyMenu, moveOrSwapMeals, updateMeal } from '../services/home/weeklyMenuService'
 import { useShoppingList } from '../hooks/useShoppingList'
 import {
   getMealIngredients,

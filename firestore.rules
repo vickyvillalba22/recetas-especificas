@@ -14,6 +14,63 @@ service cloud.firestore {
       return signedIn() && request.auth.token.role == 'admin';
     }
 
+    function validMedicalRecord(record, userId) {
+      return record.keys().hasOnly([
+          'userId',
+          'type',
+          'date',
+          'time',
+          'specialty',
+          'professional',
+          'reason',
+          'modality',
+          'location',
+          'status',
+          'notes',
+          'studyType',
+          'result',
+          'createdAt',
+          'updatedAt'
+        ])
+        && record.keys().hasAll(['userId', 'type', 'date', 'status', 'createdAt', 'updatedAt'])
+        && record.userId == userId
+        && record.type is string
+        && record.date is string
+        && record.date.size() > 0
+        && record.createdAt is timestamp
+        && record.updatedAt is timestamp
+        && (!record.keys().hasAny(['time']) || record.time is string)
+        && (!record.keys().hasAny(['specialty']) || record.specialty is string)
+        && (!record.keys().hasAny(['professional']) || record.professional is string)
+        && (!record.keys().hasAny(['reason']) || record.reason is string)
+        && (!record.keys().hasAny(['modality']) || record.modality is string)
+        && (!record.keys().hasAny(['location']) || record.location is string)
+        && (!record.keys().hasAny(['notes']) || record.notes is string)
+        && (!record.keys().hasAny(['studyType']) || record.studyType is string)
+        && (!record.keys().hasAny(['result']) || record.result is string)
+        && (
+          (
+            record.type == 'appointment'
+            && record.keys().hasAll(['time', 'specialty', 'professional'])
+            && record.time is string
+            && record.time.size() > 0
+            && record.specialty is string
+            && record.specialty.size() > 0
+            && record.professional is string
+            && record.professional.size() > 0
+            && record.status in ['pending', 'attended', 'cancelled']
+          )
+          ||
+          (
+            record.type == 'study'
+            && record.keys().hasAll(['studyType'])
+            && record.studyType is string
+            && record.studyType.size() > 0
+            && record.status == 'completed'
+          )
+        );
+    }
+
     match /users/{userId} {
       allow create: if isOwner(userId)
         && request.resource.data.role == 'user';
@@ -22,8 +79,39 @@ service cloud.firestore {
         && request.resource.data.role == resource.data.role);
       allow delete: if isOwner(userId) || isAdmin();
 
-      match /{document=**} {
+      match /medicalRecords/{recordId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId)
+          && validMedicalRecord(request.resource.data, userId);
+        allow update: if isOwner(userId)
+          && validMedicalRecord(request.resource.data, userId)
+          && request.resource.data.userId == resource.data.userId
+          && request.resource.data.createdAt == resource.data.createdAt;
+        allow delete: if isOwner(userId);
+      }
+
+      match /journalEntries/{entryId} {
         allow read, write: if isOwner(userId);
+      }
+
+      match /favoriteRecipes/{recipeId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      match /personalRecipes/{recipeId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      match /shoppingLists/{listId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      match /weeklyMenus/{weekId} {
+        allow read, write: if isOwner(userId);
+
+        match /meals/{mealId} {
+          allow read, write: if isOwner(userId);
+        }
       }
     }
 

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { RecipeGallery } from './RecipeGallery'
 import { RecipeDetailsModal } from './RecipeDetailsModal'
 import { RemoveFavoriteModal } from './RemoveFavoriteModal'
-import { deleteFavoriteRecipe, getFavoriteRecipes } from '../../services/favoriteRecipesService'
+import { deleteFavoriteRecipe, getFavoriteRecipes } from '../../services/recipes/favoriteRecipesService'
 
 export function FavoriteRecipesPage() {
   const router = useRouter()

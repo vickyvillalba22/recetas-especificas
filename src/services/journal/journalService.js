@@ -8,7 +8,7 @@ import {
   getUserCollection,
   getUserDocument,
   runFirestoreOperation,
-} from './firestoreService'
+} from '../firestoreService'
 
 function formatJournalDate(value) {
   const date = firebaseTimestampToDate(value)

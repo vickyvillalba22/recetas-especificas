@@ -9,12 +9,12 @@ import {
   deleteJournalEntry,
   getJournalEntries,
   updateJournalEntry,
-} from "../../services/journalService";
+} from "../../services/journal/journalService";
 import {
   downloadJournalEntriesPdf,
   filterJournalEntriesByDateRange,
   getJournalDateBounds,
-} from "../../services/journalPdfService";
+} from "../../services/journal/journalPdfService";
 
 export default function JournalPage() {
   const [journalText, setJournalText] = useState("");

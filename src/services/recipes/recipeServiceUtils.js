@@ -1,4 +1,4 @@
-import { firebaseTimestampToISOString } from './firestoreService'
+import { firebaseTimestampToISOString } from '../firestoreService'
 
 export function normalizeRecipeArray(value) {
   return Array.isArray(value) ? value.filter(Boolean) : []

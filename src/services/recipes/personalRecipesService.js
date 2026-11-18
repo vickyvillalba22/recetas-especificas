@@ -6,7 +6,7 @@ import {
   getUserCollection,
   getUserDocument,
   runFirestoreOperation,
-} from './firestoreService'
+} from '../firestoreService'
 import { mapRecipeSnapshot, recipePayload } from './recipeServiceUtils'
 
 function sortRecipes(recipes) {

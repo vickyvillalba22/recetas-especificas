@@ -20,8 +20,8 @@ import {
   getUserCollection,
   getUserDocument,
   runFirestoreOperation,
-} from './firestoreService'
-import { db } from '../lib/firebase/client'
+} from '../firestoreService'
+import { db } from '../../lib/firebase/client'
 
 function getMonday(date) {
   const monday = new Date(date)

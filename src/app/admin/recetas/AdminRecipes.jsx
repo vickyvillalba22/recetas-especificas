@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { RecipeFormModal } from '../../../components/recipes/RecipeFormModal'
 import { RecipeGallery } from '../../../components/recipes/RecipeGallery'
-import { createPublicRecipe, deletePublicRecipe, getAllPublicRecipes, updatePublicRecipe } from '../../../services/publicRecipesService'
+import { createPublicRecipe, deletePublicRecipe, getAllPublicRecipes, updatePublicRecipe } from '../../../services/recipes/publicRecipesService'
 
 export function AdminRecipes() {
   const router = useRouter()

@@ -1,8 +1,8 @@
 'use client'
 
 import { addDoc, collection, deleteDoc, getDoc, getDocs, query, serverTimestamp, updateDoc, where, doc } from 'firebase/firestore'
-import { db } from '../lib/firebase/client'
-import { getCurrentUserId, runFirestoreOperation } from './firestoreService'
+import { db } from '../../lib/firebase/client'
+import { getCurrentUserId, runFirestoreOperation } from '../firestoreService'
 import { mapRecipeSnapshot, recipePayload } from './recipeServiceUtils'
 
 const recipesRef = collection(db, 'publicRecipes')

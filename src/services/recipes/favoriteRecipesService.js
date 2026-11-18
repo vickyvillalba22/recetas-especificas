@@ -1,7 +1,7 @@
 'use client'
 
 import { deleteDoc, getDoc, getDocs, serverTimestamp, setDoc } from 'firebase/firestore'
-import { getCurrentUserId, getUserCollection, getUserDocument, runFirestoreOperation } from './firestoreService'
+import { getCurrentUserId, getUserCollection, getUserDocument, runFirestoreOperation } from '../firestoreService'
 import { mapRecipeSnapshot, recipePayload } from './recipeServiceUtils'
 
 function sortRecipes(recipes) {

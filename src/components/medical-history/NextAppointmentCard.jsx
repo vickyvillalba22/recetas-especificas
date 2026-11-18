@@ -1,4 +1,4 @@
-import { Calendar, Clock3, UserCircle } from '../ui/icons'
+import { Calendar, Clock3, PencilEdit, UserCircle } from '../ui/icons'
 
 function formatAppointmentDate(date) {
   return new Intl.DateTimeFormat('es-AR', {
@@ -8,8 +8,18 @@ function formatAppointmentDate(date) {
   }).format(new Date(`${date}T12:00:00`))
 }
 
-export function NextAppointmentCard({ appointment }) {
-  if (!appointment) return null
+export function NextAppointmentCard({ appointment, onEdit }) {
+  if (!appointment) {
+    return (
+      <section className="mt-8 rounded-3xl border border-dashed border-ink/15 bg-white p-5 shadow-soft dark:border-cream/15 dark:bg-ink-soft dark:shadow-soft-dark sm:px-6 sm:py-5" aria-labelledby="next-appointment-empty-title">
+        <p className="text-xs font-bold uppercase tracking-[.18em] text-coral">Próximo turno</p>
+        <h2 id="next-appointment-empty-title" className="mt-2 font-display text-xl">Todavía no tenés turnos próximos</h2>
+        <p className="mt-1 text-sm text-ink/55 dark:text-cream/55">
+          Cuando agregues un turno, vas a verlo destacado en este espacio.
+        </p>
+      </section>
+    )
+  }
 
   return (
     <section className="mt-8 overflow-hidden rounded-3xl bg-moss text-white shadow-soft" aria-labelledby="next-appointment-title">
@@ -44,9 +54,17 @@ export function NextAppointmentCard({ appointment }) {
           </div>
         </div>
 
-        <span className="w-fit rounded-full bg-white/15 px-4 py-2 text-xs font-bold text-cream sm:justify-self-end">
-          Agendado
-        </span>
+        <div className="flex items-center gap-2 sm:justify-self-end">
+          <span className="rounded-full bg-white/15 px-4 py-2 text-xs font-bold text-cream">
+            Agendado
+          </span>
+          {onEdit && (
+            <button type="button" onClick={() => onEdit(appointment)} className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-2 text-xs font-bold text-cream transition hover:bg-white/20">
+              <PencilEdit size={14} />
+              Editar
+            </button>
+          )}
+        </div>
       </div>
     </section>
   )

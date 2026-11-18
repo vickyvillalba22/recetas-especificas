@@ -11,13 +11,13 @@ import {
   deletePersonalRecipe,
   getPersonalRecipes,
   updatePersonalRecipe,
-} from "../../services/personalRecipesService";
-import { getPublicRecipes } from "../../services/publicRecipesService";
+} from "../../services/recipes/personalRecipesService";
+import { getPublicRecipes } from "../../services/recipes/publicRecipesService";
 import {
   deleteFavoriteRecipe,
   getFavoriteRecipes,
   saveFavoriteRecipe,
-} from "../../services/favoriteRecipesService";
+} from "../../services/recipes/favoriteRecipesService";
 
 const personalService = {
   create: createPersonalRecipe,

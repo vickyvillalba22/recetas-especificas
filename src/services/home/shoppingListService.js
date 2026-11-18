@@ -1,7 +1,7 @@
 'use client'
 
 import { getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
-import { getUserDocument, runFirestoreOperation } from './firestoreService'
+import { getUserDocument, runFirestoreOperation } from '../firestoreService'
 
 function normalizeItems(items) {
   return Array.isArray(items)

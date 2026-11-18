@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { saveShoppingList } from '../services/shoppingListService'
+import { saveShoppingList } from '../services/home/shoppingListService'
 import {
   formatShoppingItem,
   getShoppingItemKey,

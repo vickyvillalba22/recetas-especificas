@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getAuthErrorMessage, useAuth } from '../../context/AuthContext'
-import { saveHealthProfile } from '../../services/healthProfileService'
+import { saveHealthProfile } from '../../services/health-profile/healthProfileService'
 import { ArrowLeft } from '../../components/ui/icons'
 import { ConfirmationScreen } from './ConfirmationScreen'
 import { DietaryPreferencesStep } from './steps/DietaryPreferencesStep'
@@ -11,7 +11,7 @@ import { PrivacyNotice } from './PrivacyNotice'
 import { MedicalHealthStep } from './steps/MedicalHealthStep'
 import { CurrentPathologyStep } from './steps/CurrentPathologyStep'
 import { PersonalContextStep } from './steps/PersonalContextStep'
-import { INITIAL_HEALTH_PROFILE } from '../../services/healthProfileDefaults'
+import { INITIAL_HEALTH_PROFILE } from '../../services/health-profile/healthProfileDefaults'
 
 const TOTAL_STEPS = 4
 

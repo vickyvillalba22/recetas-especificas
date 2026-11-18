@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '../../context/AuthContext'
 import { BookHeart, CirclePlus, Clock3 } from '../../components/ui/icons'
-import { getAllPublicRecipes } from '../../services/publicRecipesService'
+import { getAllPublicRecipes } from '../../services/recipes/publicRecipesService'
 
 function getProviderLabel(providers) {
   if (providers?.includes('google.com')) return 'Google'

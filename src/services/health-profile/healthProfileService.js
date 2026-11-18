@@ -1,8 +1,8 @@
 'use client'
 
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore'
-import { db } from '../lib/firebase/client'
-import { getCurrentUserId, runFirestoreOperation } from './firestoreService'
+import { db } from '../../lib/firebase/client'
+import { getCurrentUserId, runFirestoreOperation } from '../firestoreService'
 
 export function saveHealthProfile(perfilSalud) {
   return runFirestoreOperation(

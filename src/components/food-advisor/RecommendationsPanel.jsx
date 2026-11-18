@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '../../context/AuthContext'
-import { saveFavoriteRecipe } from '../../services/favoriteRecipesService'
+import { saveFavoriteRecipe } from '../../services/recipes/favoriteRecipesService'
 import { CirclePlus, Star } from '../ui/icons'
 
 const MAX_CACHE_ENTRIES = 10
