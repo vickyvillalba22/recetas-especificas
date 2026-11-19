@@ -2,10 +2,20 @@ import 'server-only'
 
 import { GoogleGenAI, Type } from '@google/genai'
 
-const MODEL = 'gemini-3.5-flash-lite'
+const PRIMARY_MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite'
+const FALLBACK_MODELS = [
+  'gemini-3.1-flash-lite',
+  'gemini-3.1-flash',
+]
+const MAX_MODEL_ATTEMPTS = 3
+const MODEL_TIMEOUT_MS = 12000
+const TEMPORARY_MODEL_COOLDOWN_MS = 30 * 1000
+const UNAVAILABLE_MODEL_COOLDOWN_MS = 24 * 60 * 60 * 1000
 const JSON_MIME_TYPE = 'application/json'
 
 let aiClient
+let availableModelsPromise
+const modelCooldowns = new Map()
 
 function getAIClient() {
   if (aiClient) return aiClient
@@ -17,9 +27,189 @@ function getAIClient() {
 
   aiClient = new GoogleGenAI({
     apiKey,
-    httpOptions: { timeout: 15000 },
+    httpOptions: {
+      timeout: MODEL_TIMEOUT_MS,
+      retryOptions: {
+        attempts: 1,
+      },
+    },
   })
   return aiClient
+}
+
+function normalizeModelName(name) {
+  return String(name || '').replace(/^models\//, '')
+}
+
+async function getAvailableFlashModels() {
+  if (!availableModelsPromise) {
+    availableModelsPromise = (async () => {
+      try {
+        const models = []
+        const allowedModels = new Set([PRIMARY_MODEL, ...FALLBACK_MODELS])
+        const pager = await getAIClient().models.list()
+
+        for await (const model of pager) {
+          if (
+            model?.name &&
+            model.supportedActions?.includes('generateContent') &&
+            allowedModels.has(normalizeModelName(model.name))
+          ) {
+            models.push(normalizeModelName(model.name))
+          }
+        }
+
+        return models
+      } catch (error) {
+        console.warn(
+          'No se pudo listar los modelos de Gemini; se usarán los candidatos configurados.',
+          error?.message || error,
+        )
+        return []
+      }
+    })()
+  }
+
+  return availableModelsPromise
+}
+
+async function getCandidateModels() {
+  const availableModels = await getAvailableFlashModels()
+  const configuredModels = [PRIMARY_MODEL, ...FALLBACK_MODELS]
+  const now = Date.now()
+
+  if (!availableModels.length) {
+    return [...new Set(configuredModels)].filter(
+      (model) => (modelCooldowns.get(model) || 0) <= now,
+    )
+  }
+
+  const availableSet = new Set(availableModels)
+  const preferredModels = configuredModels.filter((model) =>
+    availableSet.has(model) && (modelCooldowns.get(model) || 0) <= now,
+  )
+
+  return [...new Set(preferredModels)]
+}
+
+function isLiteModel(model) {
+  return /-lite(?:-|$)/i.test(model)
+}
+
+function isTimeoutError(error) {
+  const message = String(error?.message || '').toLowerCase()
+  const code = String(error?.code || '').toLowerCase()
+
+  return (
+    error?.name === 'AbortError' ||
+    code === 'etimedout' ||
+    code === 'timeout' ||
+    message.includes('timeout') ||
+    message.includes('timed out') ||
+    message.includes('timedout') ||
+    message.includes('deadline exceeded') ||
+    message.includes('deadline_exceeded') ||
+    message.includes('deadline_expired')
+  )
+}
+
+function isFallbackError(error) {
+  const status = Number(error?.status || error?.code)
+  return (
+    status === 404 ||
+    status === 429 ||
+    status === 503 ||
+    status === 504 ||
+    isTimeoutError(error)
+  )
+}
+
+function getRetryDelayMs(error) {
+  const message = String(error?.message || '')
+
+  try {
+    const payload = JSON.parse(message)
+    const retryInfo = payload?.error?.details?.find((detail) =>
+      String(detail?.['@type'] || '').includes('RetryInfo'),
+    )
+    const retryDelay = String(retryInfo?.retryDelay || '')
+    const seconds = Number.parseFloat(retryDelay.replace(/s$/, ''))
+
+    if (Number.isFinite(seconds) && seconds > 0) {
+      return Math.min(seconds * 1000, UNAVAILABLE_MODEL_COOLDOWN_MS)
+    }
+  } catch {
+    // The SDK can return non-JSON error messages.
+  }
+
+  return null
+}
+
+function cooldownModel(model, error) {
+  const status = Number(error?.status || error?.code)
+  const cooldown =
+    status === 404
+      ? UNAVAILABLE_MODEL_COOLDOWN_MS
+      : getRetryDelayMs(error) || TEMPORARY_MODEL_COOLDOWN_MS
+
+  modelCooldowns.set(model, Date.now() + cooldown)
+}
+
+function getModelConfig(model, config) {
+  if (isLiteModel(model)) return { ...config }
+
+  return {
+    ...config,
+    thinkingConfig: { thinkingBudget: 0 },
+  }
+}
+
+async function generateContentWithFallback({ contents, config }) {
+  const candidateModels = (await getCandidateModels()).slice(
+    0,
+    MAX_MODEL_ATTEMPTS,
+  )
+  let lastError
+
+  if (!candidateModels.length) {
+    const error = new Error(
+      'No hay modelos Gemini disponibles temporalmente. Intentá nuevamente más tarde.',
+    )
+    error.status = 503
+    throw error
+  }
+
+  for (const model of candidateModels) {
+    try {
+      const response = await getAIClient().models.generateContent({
+        model,
+        contents,
+        config: getModelConfig(model, config),
+      })
+
+      console.log('Gemini model respondió:', model)
+      return { response, model }
+    } catch (error) {
+      lastError = error
+
+      if (!isFallbackError(error)) {
+        throw error
+      }
+
+      cooldownModel(model, error)
+      console.warn(
+        `Gemini model ${model} no disponible:`,
+        {
+          status: error?.status || null,
+          code: error?.code || null,
+          name: error?.name || null,
+          message: error?.message || 'timeout',
+        },
+      )
+    }
+  }
+
+  throw lastError || new Error('No hay modelos Gemini disponibles.')
 }
 
 const recipesResponseSchema = {
@@ -146,8 +336,7 @@ export async function recomendarRecetas({ consulta, perfilSalud }) {
   }
 
   const profile = serializeHealthProfile(perfilSalud)
-  const response = await getAIClient().models.generateContent({
-    model: MODEL,
+  const { response } = await generateContentWithFallback({
     contents: [
       {
         role: 'user',
@@ -205,8 +394,7 @@ export async function analizarIngredienteImagen({
   }
 
   const profile = serializeHealthProfile(perfilSalud)
-  const response = await getAIClient().models.generateContent({
-    model: MODEL,
+  const { response } = await generateContentWithFallback({
     contents: [
       {
         role: 'user',

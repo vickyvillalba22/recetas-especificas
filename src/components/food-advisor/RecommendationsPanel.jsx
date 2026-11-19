@@ -7,6 +7,12 @@ import { useRecipeMenuFlow } from '../../hooks/useRecipeMenuFlow'
 import { CirclePlus, Star } from '../ui/icons'
 
 const MAX_CACHE_ENTRIES = 10
+const LOADING_MESSAGES = [
+  'Revisando tu perfil...',
+  'Buscando opciones compatibles...',
+  'Pensando combinaciones...',
+  'Preparando tus ideas...',
+]
 
 export function RecommendationsPanel() {
   const { user } = useAuth()
@@ -20,6 +26,7 @@ export function RecommendationsPanel() {
   const [favoriteSavingId, setFavoriteSavingId] = useState(null)
   const [debugResponse, setDebugResponse] = useState(null)
   const [cooldownSeconds, setCooldownSeconds] = useState(0)
+  const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES[0])
   const cooldownTimerRef = useRef(null)
   const recommendationsCacheRef = useRef(new Map())
 
@@ -30,6 +37,22 @@ export function RecommendationsPanel() {
       }
     }
   }, [])
+
+  useEffect(() => {
+    if (!isLoading) {
+      setLoadingMessage(LOADING_MESSAGES[0])
+      return undefined
+    }
+
+    let messageIndex = 0
+    setLoadingMessage(LOADING_MESSAGES[messageIndex])
+    const messageTimer = window.setInterval(() => {
+      messageIndex = (messageIndex + 1) % LOADING_MESSAGES.length
+      setLoadingMessage(LOADING_MESSAGES[messageIndex])
+    }, 2200)
+
+    return () => window.clearInterval(messageTimer)
+  }, [isLoading])
 
   function startCooldown() {
     if (cooldownTimerRef.current) {
@@ -148,7 +171,12 @@ export function RecommendationsPanel() {
 
       if (!response.ok) {
         if (payload.debug) setDebugResponse(payload.debug)
-        throw new Error(payload.error || 'No pudimos obtener recomendaciones.')
+        const requestError = new Error(
+          payload.error || 'No pudimos obtener recomendaciones.',
+        )
+        requestError.code = payload.code
+        requestError.status = response.status
+        throw requestError
       }
 
       if (!payload.result || !Array.isArray(payload.result.recetas)) {
@@ -170,11 +198,19 @@ export function RecommendationsPanel() {
       setResult(normalizedResult)
     } catch (requestError) {
       if (requestError.debug) setDebugResponse(requestError.debug)
-      setError(
-        requestError.name === 'AbortError'
-          ? 'La consulta tardó demasiado. Intentá nuevamente.'
-          : requestError.message || 'No pudimos obtener recomendaciones.',
-      )
+      if (requestError.name === 'AbortError') {
+        setError('La consulta tardó demasiado. Intentá nuevamente.')
+      } else if (requestError.code === 'GEMINI_UNAVAILABLE') {
+        setError(
+          'El servicio de recomendaciones está temporalmente ocupado. Intentá nuevamente en unos segundos.',
+        )
+      } else if (requestError.code === 'SESSION_EXPIRED' || requestError.status === 401) {
+        setError('Tu sesión venció. Volvé a iniciar sesión para pedir recomendaciones.')
+      } else if (requestError.code === 'RATE_LIMIT') {
+        setError(requestError.message)
+      } else {
+        setError(requestError.message || 'No pudimos obtener recomendaciones.')
+      }
     } finally {
       window.clearTimeout(timeoutId)
       setIsLoading(false)
@@ -216,7 +252,7 @@ export function RecommendationsPanel() {
         </p>
       )}
       {debugResponse && (
-        <details className="mt-4 rounded-xl border border-ink/15 bg-ink/5 p-3 text-xs dark:border-cream/15 dark:bg-cream/5">
+        <details className="hidden mt-4 rounded-xl border border-ink/15 bg-ink/5 p-3 text-xs dark:border-cream/15 dark:bg-cream/5">
           <summary className="cursor-pointer font-bold">
             Respuesta cruda de Gemini (diagnóstico temporal)
           </summary>
@@ -234,7 +270,7 @@ export function RecommendationsPanel() {
         className="mt-5 rounded-full bg-moss px-6 py-3.5 text-sm font-bold text-white transition hover:bg-ink disabled:cursor-not-allowed disabled:opacity-40"
       >
         {isLoading
-          ? 'Buscando ideas...'
+          ? loadingMessage
           : cooldownSeconds > 0
             ? `Esperá ${cooldownSeconds}s`
             : 'Recibir ideas'}

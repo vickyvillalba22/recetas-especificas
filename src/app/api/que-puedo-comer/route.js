@@ -105,11 +105,27 @@ function isGeminiUnavailableError(error) {
   const message = String(error?.message || '').toLowerCase()
 
   return (
+    status === 404 ||
+    status === '404' ||
+    status === 429 ||
+    status === '429' ||
     status === 503 ||
     status === '503' ||
+    status === 504 ||
+    status === '504' ||
     message.includes('unavailable') ||
-    message.includes('high demand')
+    message.includes('high demand') ||
+    message.includes('timeout') ||
+    message.includes('timed out') ||
+    message.includes('deadline exceeded') ||
+    message.includes('deadline_exceeded') ||
+    message.includes('deadline_expired')
   )
+}
+
+function getGeminiUnavailableStatus(error) {
+  const status = Number(error?.status || error?.code)
+  return status === 429 ? 429 : 503
 }
 
 export async function POST(request) {
@@ -236,12 +252,22 @@ export async function POST(request) {
           profileDurationMs,
           geminiDurationMs: Date.now() - geminiStartTime,
           totalDurationMs: Date.now() - profileStartTime,
+          error: {
+            name: error?.name || null,
+            status: error?.status || null,
+            code: error?.code || null,
+            message: error?.message || null,
+            finishReason: error?.finishReason || null,
+          },
         })
-         return jsonError(
-           error.message || 'Gemini no pudo procesar la respuesta.',
-           502,
-           isGeminiUnavailableError(error) ? 'GEMINI_UNAVAILABLE' : 'AI_ERROR',
-           {
+        const geminiUnavailable = isGeminiUnavailableError(error)
+        return jsonError(
+          geminiUnavailable
+            ? 'El servicio de recomendaciones está temporalmente ocupado. Intentá nuevamente en unos segundos.'
+            : 'Gemini no pudo procesar la respuesta. Intentá nuevamente.',
+          geminiUnavailable ? getGeminiUnavailableStatus(error) : 502,
+          geminiUnavailable ? 'GEMINI_UNAVAILABLE' : 'AI_ERROR',
+          {
             rawResponse: error.rawResponse || '',
             finishReason: error.finishReason || 'unknown',
           },
@@ -259,12 +285,13 @@ export async function POST(request) {
       return Response.json({ result })
     } catch (error) {
       console.error('Qué puedo comer image analysis error:', error)
+      const geminiUnavailable = isGeminiUnavailableError(error)
       return jsonError(
-        isGeminiUnavailableError(error)
+        geminiUnavailable
           ? 'El servicio de análisis está temporalmente ocupado.'
           : 'No pudimos analizar la imagen.',
-        isGeminiUnavailableError(error) ? 503 : 502,
-        isGeminiUnavailableError(error) ? 'GEMINI_UNAVAILABLE' : 'AI_ERROR',
+        geminiUnavailable ? getGeminiUnavailableStatus(error) : 502,
+        geminiUnavailable ? 'GEMINI_UNAVAILABLE' : 'AI_ERROR',
       )
     }
   } catch (error) {
