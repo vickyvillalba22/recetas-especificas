@@ -96,6 +96,7 @@
     display: block;
     width: 100%;
     min-width: 0;
+    min-height: 3.125rem;
     text-align: left;
     appearance: none;
     -webkit-appearance: none;
