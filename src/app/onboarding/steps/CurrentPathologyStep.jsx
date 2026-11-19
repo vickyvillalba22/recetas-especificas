@@ -31,6 +31,7 @@ const PROTOCOL_PHASE_OPTIONS = [
 const SYMPTOM_OPTIONS = [
   { value: 'hinchazon-distension', label: 'Hinchazón / distensión' },
   { value: 'gases', label: 'Gases' },
+  { value: 'acidez', label: 'Acidez' },
   { value: 'dolor-abdominal', label: 'Dolor abdominal' },
   { value: 'diarrea', label: 'Diarrea' },
   { value: 'estrenimiento', label: 'Estreñimiento' },

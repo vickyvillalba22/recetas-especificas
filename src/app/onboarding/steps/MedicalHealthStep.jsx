@@ -95,7 +95,7 @@ export function MedicalHealthStep({ formData, onChange }) {
 
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="block text-sm font-bold">
-          ¿Contás con diagnóstico médico confirmado?
+          ¿Contás con diagnóstico médico sobre SIBO confirmado?
           <select
             className="field mt-2"
             value={getValue(formData.diagnosticoMedico)}
@@ -142,7 +142,7 @@ export function MedicalHealthStep({ formData, onChange }) {
       )}
 
       <CheckboxGroup
-        title="Condiciones digestivas asociadas"
+        title="Condiciones digestivas asociadas (además de SIBO)"
         options={DIGESTIVE_CONDITION_OPTIONS}
         values={conditions}
         exclusiveValue="ninguna"
